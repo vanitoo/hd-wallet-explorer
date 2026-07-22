@@ -1,2 +1,2 @@
-import { WalletExplorer } from "@/features/wallet/components/wallet-explorer";
-export default function Home() { return <main className="shell"><header><div className="brand"><span>◇</span><div><strong>HD Wallet Explorer</strong><small>Local derivation & discovery</small></div></div><span className="offline">● OFFLINE</span></header><WalletExplorer/><footer><span>v0.8.0 · MIT License</span><span>Без сервера, аналитики и cookies</span></footer></main>; }
+import { AppShell } from "@/features/wallet/components/app-shell";
+export default function Home() { return <main className="shell"><header><div className="brand"><span>◇</span><div><strong>HD Wallet Explorer</strong><small>Local derivation & discovery</small></div></div><span className="offline">● OFFLINE-FIRST</span></header><AppShell/><footer><span>v0.10.0 · MIT License</span><span>Без сервера, аналитики и cookies</span></footer></main>; }
