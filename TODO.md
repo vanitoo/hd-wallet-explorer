@@ -10,9 +10,11 @@
 - [x] Request cancellation, retries and configurable delays
 - [x] Watch-only xpub/ypub/zpub/tpub/upub/vpub profiles
 - [x] Public profile persistence in localStorage
-- [ ] Watch-only scanner integration
+- [x] Watch-only scanner integration
+- [x] External/change discovery for current account
+- [ ] Wallet descriptors and multi-account profile sets
 - [ ] Taproot BIP86 watch-only policy
-- [ ] Account discovery across external/change branches
+- [ ] Pause/resume persisted discovery sessions
 - [ ] Encrypted optional profile backup
 - [ ] Solana and Tron
 - [ ] Independent security audit
