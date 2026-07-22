@@ -5,6 +5,7 @@ import { secp256k1 } from "@noble/curves/secp256k1.js";
 import { ripemd160 } from "@noble/hashes/legacy.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { inspectMnemonic } from "./ethereum.ts";
+import { assertDerivationPathPrefix, formatDerivationPath, validateChildIndex } from "./derivation-path.ts";
 
 export type BitcoinType = "legacy" | "nested-segwit" | "native-segwit" | "taproot";
 export type BitcoinNetwork = "mainnet" | "testnet";
@@ -29,14 +30,17 @@ export function bitcoinPath(
   account: number,
   change: 0 | 1,
   index: number,
-) {
-  for (const value of [account, index]) {
-    if (!Number.isInteger(value) || value < 0 || value > 0x7fffffff) {
-      throw new Error("Индекс должен быть целым от 0 до 2147483647.");
-    }
-  }
+): string {
+  validateChildIndex(account, "Account");
+  validateChildIndex(index, "Индекс адреса");
 
-  return `m/${PURPOSE[type]}'/${network === "mainnet" ? 0 : 1}'/${account}'/${change}/${index}`;
+  return formatDerivationPath([
+    { index: PURPOSE[type], hardened: true },
+    { index: network === "mainnet" ? 0 : 1, hardened: true },
+    { index: account, hardened: true },
+    { index: change, hardened: false },
+    { index, hardened: false },
+  ]);
 }
 
 export function deriveBitcoin(
@@ -51,17 +55,18 @@ export function deriveBitcoin(
   const validation = inspectMnemonic(input.mnemonic);
   if (!validation.valid) throw new Error(validation.message);
 
-  const prefix = `m/${PURPOSE[input.type]}'/${input.network === "mainnet" ? 0 : 1}'/`;
-  if (!input.path.startsWith(prefix)) {
-    throw new Error(`Путь должен начинаться с ${prefix}`);
-  }
+  const prefix = formatDerivationPath([
+    { index: PURPOSE[input.type], hardened: true },
+    { index: input.network === "mainnet" ? 0 : 1, hardened: true },
+  ]);
+  const normalizedPath = assertDerivationPathPrefix(input.path, prefix);
 
   const seed = mnemonicToSeedSync(
     validation.normalized,
     input.passphrase.normalize("NFKD"),
   );
   const root = HDKey.fromMasterSeed(seed);
-  const child = root.derive(input.path);
+  const child = root.derive(normalizedPath);
 
   try {
     if (!child.privateKey) throw new Error("Приватный ключ не получен.");
@@ -85,7 +90,7 @@ function deriveAddress(
   privateKey: Uint8Array,
   network: BitcoinNetwork,
   type: BitcoinType,
-) {
+): string {
   const publicKeyHash = hash160(publicKey);
 
   if (type === "legacy") {
@@ -111,7 +116,7 @@ function deriveAddress(
   return bech32m.encode(humanReadablePart, [1, ...bech32m.toWords(outputKey)], 90);
 }
 
-function taprootOutputKey(privateKey: Uint8Array) {
+function taprootOutputKey(privateKey: Uint8Array): Uint8Array {
   const publicKey = secp256k1.getPublicKey(privateKey, true);
   const xOnlyPublicKey = publicKey.slice(1);
   let secret = bytesToBigInt(privateKey);
@@ -128,7 +133,7 @@ function taprootOutputKey(privateKey: Uint8Array) {
   return secp256k1.getPublicKey(bigIntToBytes(outputSecret), true).slice(1);
 }
 
-function encodeWif(privateKey: Uint8Array, network: BitcoinNetwork) {
+function encodeWif(privateKey: Uint8Array, network: BitcoinNetwork): string {
   return base58Check(
     concat(
       Uint8Array.of(network === "mainnet" ? 0x80 : 0xef),
@@ -138,15 +143,15 @@ function encodeWif(privateKey: Uint8Array, network: BitcoinNetwork) {
   );
 }
 
-function base58Check(payload: Uint8Array) {
+function base58Check(payload: Uint8Array): string {
   return base58.encode(concat(payload, sha256(sha256(payload)).slice(0, 4)));
 }
 
-function hash160(value: Uint8Array) {
+function hash160(value: Uint8Array): Uint8Array {
   return ripemd160(sha256(value));
 }
 
-function concat(...parts: Uint8Array[]) {
+function concat(...parts: Uint8Array[]): Uint8Array {
   const result = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
   let offset = 0;
   for (const part of parts) {
@@ -156,15 +161,15 @@ function concat(...parts: Uint8Array[]) {
   return result;
 }
 
-function toHex(value: Uint8Array) {
+function toHex(value: Uint8Array): string {
   return Array.from(value, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-function bytesToBigInt(value: Uint8Array) {
+function bytesToBigInt(value: Uint8Array): bigint {
   return BigInt(`0x${toHex(value)}`);
 }
 
-function bigIntToBytes(value: bigint) {
+function bigIntToBytes(value: bigint): Uint8Array {
   const hex = value.toString(16).padStart(64, "0");
   return Uint8Array.from(hex.match(/.{2}/gu) ?? [], (pair) => Number.parseInt(pair, 16));
 }
