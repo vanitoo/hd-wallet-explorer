@@ -28,6 +28,9 @@
 - [x] Add official BIP39 seed-vector coverage
 - [x] Add Derivation Explorer with arbitrary paths and presets
 - [x] Add derivation-level explanations and public result output
+- [x] Add Path Comparison for BIP44/BIP49/BIP84/BIP86 and Ethereum
+- [x] Add public-only CSV/JSON comparison export
+- [x] Add path-comparison tests for mainnet, testnet and secret-free exports
 
 ## v1.0 — Wallet Exploration Suite
 
@@ -72,23 +75,23 @@
 - [x] Derive public key and address
 - [x] Keep UI output public-only
 - [x] Add derivation explorer tests
-- [ ] Add CSV/JSON export for public derivation results
+- [ ] Add CSV/JSON export for single public derivation results
 
 ### Path Comparison
 
-- [ ] Compare BIP44/BIP49/BIP84/BIP86 from one seed
-- [ ] Show path, standard, script type, address and public key
-- [ ] Bitcoin mainnet/testnet comparison
-- [ ] Ethereum standard-path comparison
-- [ ] Explain why one seed creates different addresses
-- [ ] CSV/JSON export
-- [ ] Comparison vector tests
+- [x] Compare BIP44/BIP49/BIP84/BIP86 from one seed
+- [x] Show path, standard, script type, address and public key
+- [x] Bitcoin mainnet/testnet comparison
+- [x] Ethereum standard-path comparison
+- [x] Explain why one seed creates different addresses
+- [x] CSV/JSON export
+- [x] Comparison tests
 
 ### Professional Explorer UI
 
 - [ ] Permanent sidebar navigation
 - [ ] Dashboard as default landing page
-- [ ] Sections: Workspace, Seed, Derivation, Bitcoin, Ethereum, Settings, About
+- [ ] Sections: Workspace, Seed, Derivation, Comparison, Bitcoin, Ethereum, Settings, About
 - [ ] Reusable stat cards and summary panels
 - [ ] Recent discovery and workspace activity
 - [ ] Public portfolio summary
