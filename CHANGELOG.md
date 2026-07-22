@@ -22,7 +22,12 @@
 - классификация Bitcoin mainnet/testnet и Ethereum paths;
 - разбор уровней purpose, coin type, account, branch и address index;
 - вывод normalized path, standard, network, script type, address, public key и derived xpub;
-- тесты presets, BIP84, Ethereum и custom BIP32 derivation.
+- тесты presets, BIP84, Ethereum и custom BIP32 derivation;
+- рабочий Path Comparison для BIP44/BIP49/BIP84/BIP86 и Ethereum;
+- сравнительная таблица path, network, script type, address и public key;
+- mainnet/testnet, account, receive/change и address-index controls;
+- public-only CSV/JSON export результатов сравнения;
+- тесты mainnet/testnet comparison и проверки отсутствия mnemonic/passphrase в экспорте.
 
 ### Changed
 
@@ -31,9 +36,9 @@
 - Bitcoin path builder и Bitcoin derivation используют общий derivation-path formatter и validator.
 - Seed Explorer хранит mnemonic, passphrase и вычисленные секреты только в состоянии текущей вкладки и не подключён к Workspace/localStorage.
 - Derivation Explorer использует существующие Bitcoin/Ethereum engines и возвращает в UI только публичные результаты.
-- В основной навигации появился отдельный раздел Derivation Explorer.
-- В roadmap добавлены работа с BIP39 mnemonic и passphrase, wallet seed, master fingerprint, master keys и sensitive-session lifecycle.
-- Добавлен отдельный этап сравнения BIP44/BIP49/BIP84/BIP86 derivation paths.
+- В основной навигации появились отдельные разделы Derivation Explorer и Path Comparison.
+- Path Comparison повторно использует проверенные derivation engines вместо отдельной криптографической реализации.
+- CSV/JSON comparison export не содержит mnemonic, passphrase или приватные ключи.
 - Уточнены границы: descriptors, multisig, PSBT и анализ готовых публичных объектов остаются в Wallet Key Explorer.
 - Recovery, поиск неизвестных derivation paths и wallet fingerprinting остаются в Wallet Recovery Studio.
 
@@ -42,8 +47,7 @@
 - workspace serialization security tests;
 - Seed Explorer copy controls with explicit warnings;
 - complete BIP32 vector suite;
-- public derivation result export;
-- Path Comparison;
+- single derivation result export;
 - интеграция модулей в Professional Explorer UI.
 
 ## 0.10.0 — 2026-07-22
