@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { exploreSeed, maskSecret, type SeedExplorerResult } from "../domain/seed-explorer";
 
 const DEMO_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
@@ -16,12 +16,20 @@ export function SeedExplorerPanel() {
 
   const hasSensitiveData = Boolean(mnemonic || passphrase || result);
   const autoClearLabel = useMemo(() => `${AUTO_CLEAR_MS / 60000} минут`, []);
+  const clearSensitiveData = useCallback((): void => {
+    setMnemonic("");
+    setPassphrase("");
+    setResult(null);
+    setError("");
+    setShowSeed(false);
+    setShowXprv(false);
+  }, []);
 
   useEffect(() => {
     if (!hasSensitiveData) return;
     const timeout = window.setTimeout(clearSensitiveData, AUTO_CLEAR_MS);
     return () => window.clearTimeout(timeout);
-  }, [mnemonic, passphrase, result, hasSensitiveData]);
+  }, [clearSensitiveData, hasSensitiveData]);
 
   function inspect(): void {
     try {
@@ -33,15 +41,6 @@ export function SeedExplorerPanel() {
       setResult(null);
       setError(cause instanceof Error ? cause.message : "Не удалось разобрать seed-фразу.");
     }
-  }
-
-  function clearSensitiveData(): void {
-    setMnemonic("");
-    setPassphrase("");
-    setResult(null);
-    setError("");
-    setShowSeed(false);
-    setShowXprv(false);
   }
 
   return (
@@ -97,18 +96,8 @@ export function SeedExplorerPanel() {
           <Result label="Entropy" value={result.entropyHex} mono />
           <Result label="Master fingerprint" value={result.masterFingerprint} mono />
           <Result label="Master xpub" value={result.masterXpub} mono />
-          <Result
-            label="Wallet seed"
-            value={showSeed ? result.seedHex : maskSecret(result.seedHex)}
-            mono
-            action={<button className="small secondary" onClick={() => setShowSeed((value) => !value)}>{showSeed ? "Скрыть" : "Показать"}</button>}
-          />
-          <Result
-            label="Master xprv — опасный режим"
-            value={showXprv ? result.masterXprv : maskSecret(result.masterXprv)}
-            mono
-            action={<button className="small secondary" onClick={() => setShowXprv((value) => !value)}>{showXprv ? "Скрыть" : "Показать"}</button>}
-          />
+          <Result label="Wallet seed" value={showSeed ? result.seedHex : maskSecret(result.seedHex)} mono action={<button className="small secondary" onClick={() => setShowSeed((value) => !value)}>{showSeed ? "Скрыть" : "Показать"}</button>} />
+          <Result label="Master xprv — опасный режим" value={showXprv ? result.masterXprv : maskSecret(result.masterXprv)} mono action={<button className="small secondary" onClick={() => setShowXprv((value) => !value)}>{showXprv ? "Скрыть" : "Показать"}</button>} />
         </div>
       ) : null}
     </section>
@@ -116,10 +105,5 @@ export function SeedExplorerPanel() {
 }
 
 function Result(props: Readonly<{ label: string; value: string; mono?: boolean; action?: ReactNode }>) {
-  return (
-    <div className="result-card">
-      <div className="result-label"><span>{props.label}</span>{props.action}</div>
-      <div className={props.mono ? "mono break-all" : ""}>{props.value}</div>
-    </div>
-  );
+  return <div className="result-card"><div className="result-label"><span>{props.label}</span>{props.action}</div><div className={props.mono ? "mono break-all" : ""}>{props.value}</div></div>;
 }
