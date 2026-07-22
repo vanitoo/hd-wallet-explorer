@@ -49,7 +49,7 @@ export function inspectWatchKey(value: string): WatchKeyInfo {
   const decoded = decodeExtendedKey(value);
   const version = readUint32(decoded, 0);
   if (PRIVATE_VERSIONS.has(version) || decoded[45] === 0) {
-    throw new Error("Watch-only принимает только расширенный публичный ключ; приватный ключ использовать нельзя.");
+    throw new Error("Расширенный ключ не является публичным: Watch-only не принимает приватные ключи.");
   }
   const info = VERSION_INFO[version];
   if (!info) throw new Error("Поддерживаются xpub, ypub, zpub, tpub, upub и vpub.");
