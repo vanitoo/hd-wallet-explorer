@@ -24,6 +24,8 @@
 - [x] Define canonical derivation-path parser and formatter
 - [x] Normalize derivation markers `'`, `h` and `H`
 - [x] Add extended-key and derivation-path tests
+- [x] Add Seed Explorer with ephemeral in-memory state
+- [x] Add official BIP39 seed-vector coverage
 
 ## v1.0 — Wallet Exploration Suite
 
@@ -33,25 +35,26 @@
 - [x] Define canonical derivation-path model
 - [x] Centralize Base58Check extended-key parsing and metadata validation
 - [x] Reuse canonical path validation in Bitcoin derivation
-- [ ] Define ephemeral sensitive-session model
-- [ ] Guarantee secrets never enter localStorage, URL, logs or workspace export
-- [ ] Add security tests for workspace serialization
+- [x] Keep Seed Explorer secrets in ephemeral React state only
+- [x] Keep mnemonic, passphrase, seed and xprv out of Workspace and localStorage flows
+- [ ] Add explicit workspace-serialization security tests
 
 ### Seed Explorer
 
-- [ ] BIP39 mnemonic validation
-- [ ] Support 12/15/18/21/24 words
-- [ ] Optional BIP39 passphrase
-- [ ] Display entropy
-- [ ] Display mnemonic checksum status
-- [ ] Display wallet seed with masking
-- [ ] Display master fingerprint
-- [ ] Display master xpub
-- [ ] Dangerous opt-in display for xprv
+- [x] BIP39 mnemonic validation
+- [x] Support 12/15/18/21/24 words
+- [x] Optional BIP39 passphrase
+- [x] Display entropy
+- [x] Display mnemonic checksum status
+- [x] Display wallet seed with masking
+- [x] Display master fingerprint
+- [x] Display master xpub
+- [x] Dangerous opt-in display for xprv
 - [ ] Copy controls with explicit warnings
-- [ ] Manual clear-sensitive-data action
-- [ ] Automatic sensitive-session timeout
-- [ ] Official BIP39 and BIP32 vector tests
+- [x] Manual clear-sensitive-data action
+- [x] Automatic sensitive-session timeout
+- [x] Official BIP39 seed-vector tests
+- [ ] Add complete official BIP32 vector suite
 
 ### Derivation Explorer
 
