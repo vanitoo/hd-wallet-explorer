@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { exploreSeed, maskSecret, type SeedExplorerResult } from "../domain/seed-explorer";
 
 const DEMO_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
@@ -115,7 +115,7 @@ export function SeedExplorerPanel() {
   );
 }
 
-function Result(props: Readonly<{ label: string; value: string; mono?: boolean; action?: React.ReactNode }>) {
+function Result(props: Readonly<{ label: string; value: string; mono?: boolean; action?: ReactNode }>) {
   return (
     <div className="result-card">
       <div className="result-label"><span>{props.label}</span>{props.action}</div>
