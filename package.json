@@ -2,6 +2,7 @@
   "name": "hd-wallet-explorer",
   "version": "0.6.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
