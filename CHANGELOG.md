@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- HD Wallet Explorer официально принял область Wallet Explorer, Seed Explorer и Derivation Explorer из ошибочного roadmap Wallet Key Explorer.
+- В roadmap добавлены работа с BIP39 mnemonic и passphrase, wallet seed, master fingerprint, master keys и sensitive-session lifecycle.
+- Добавлен отдельный этап сравнения BIP44/BIP49/BIP84/BIP86 derivation paths.
+- Уточнены границы: descriptors, multisig, PSBT и анализ готовых публичных объектов остаются в Wallet Key Explorer.
+- Recovery, поиск неизвестных derivation paths и wallet fingerprinting остаются в Wallet Recovery Studio.
+
+### Planned
+
+- аудит и унификация существующего derivation core;
+- Seed Explorer;
+- Derivation Explorer;
+- Path Comparison;
+- интеграция модулей в Professional Explorer UI.
+
 ## 0.10.0 — 2026-07-22
 
 - Fixed React 19 ESLint failures caused by synchronous setState calls inside effects.
