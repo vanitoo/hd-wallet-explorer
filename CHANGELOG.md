@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0 — 2026-07-22
+
+- Added Watch-only Discovery Engine v1.
+- Added automatic scanning of External and Change branches.
+- Added address-gap stopping and per-branch maximum limits.
+- Added discovery progress, cancellation, balances and transaction summaries.
+- Added explicit documentation of hardened multi-account limitations.
+- Added version and MIT License text to the footer.
+- Added discovery helper tests.
+
 ## 0.7.0 — 2026-07-22
 
 - Added Bitcoin watch-only mode without mnemonic or private keys.
