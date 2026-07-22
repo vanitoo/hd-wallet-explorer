@@ -7,9 +7,12 @@
 - [x] CSV/JSON export
 - [x] Public-address balance scanner
 - [x] Gap-limit stopping
-- [x] Request cancellation and progress
-- [ ] Retry policy and configurable rate limits
-- [ ] Watch-only profiles
-- [ ] Encrypted local watch-only storage
+- [x] Request cancellation, retries and configurable delays
+- [x] Watch-only xpub/ypub/zpub/tpub/upub/vpub profiles
+- [x] Public profile persistence in localStorage
+- [ ] Watch-only scanner integration
+- [ ] Taproot BIP86 watch-only policy
+- [ ] Account discovery across external/change branches
+- [ ] Encrypted optional profile backup
 - [ ] Solana and Tron
 - [ ] Independent security audit
