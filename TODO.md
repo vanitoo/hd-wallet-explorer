@@ -12,6 +12,10 @@
 - [x] Public profile persistence in localStorage
 - [x] Watch-only scanner integration
 - [x] External/change discovery for current account
+- [x] Workspace dashboard and discovery history
+- [x] Public address notes, favorites and search
+- [x] Public workspace JSON import/export
+- [ ] Full transaction history with fees and explorer links
 - [ ] Wallet descriptors and multi-account profile sets
 - [ ] Taproot BIP86 watch-only policy
 - [ ] Pause/resume persisted discovery sessions
