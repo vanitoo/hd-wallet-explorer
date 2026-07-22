@@ -1,65 +1,46 @@
 # Changelog
 
-## Unreleased
+## 0.11.0 — 2026-07-23
 
 ### Added
 
-- канонический parser расширенных BIP32-ключей с Base58Check-проверкой;
-- определение public/private key, сети, SLIP-132 prefix, depth, parent fingerprint, child number, chain code и key data;
-- каноническая модель derivation path;
-- нормализация hardened-маркеров `'`, `h` и `H`;
-- структурная проверка prefix derivation path;
-- отдельные тесты extended-key и derivation-path ядра;
-- рабочий Seed Explorer;
-- BIP39 mnemonic validation для 12/15/18/21/24 слов;
-- отображение entropy, wallet seed, master fingerprint, master xpub и master xprv;
-- masked display для seed и xprv с отдельным опасным режимом;
-- ручная очистка чувствительных данных и автоматическая очистка через пять минут;
-- официальный BIP39 test vector с passphrase `TREZOR`;
-- отдельный Derivation Explorer;
-- произвольный BIP32 derivation path;
-- presets BIP44, BIP49, BIP84, BIP86 и Ethereum;
-- классификация Bitcoin mainnet/testnet и Ethereum paths;
-- разбор уровней purpose, coin type, account, branch и address index;
-- вывод normalized path, standard, network, script type, address, public key и derived xpub;
-- тесты presets, BIP84, Ethereum и custom BIP32 derivation;
-- рабочий Path Comparison для BIP44/BIP49/BIP84/BIP86 и Ethereum;
-- сравнительная таблица path, network, script type, address и public key;
-- mainnet/testnet, account, receive/change и address-index controls;
-- public-only CSV/JSON export результатов сравнения;
-- тесты mainnet/testnet comparison и проверки отсутствия mnemonic/passphrase в экспорте.
+- Seed Explorer with BIP39 validation for 12/15/18/21/24 words.
+- Entropy, mnemonic checksum, wallet seed, master fingerprint, master xpub and guarded master xprv.
+- Ephemeral sensitive session with manual cleanup and five-minute automatic cleanup.
+- Canonical BIP32 extended-key parser with Base58Check and SLIP-132 metadata.
+- Canonical derivation-path parser with normalization of `'`, `h` and `H`.
+- Derivation Explorer with arbitrary paths and BIP44/BIP49/BIP84/BIP86/Ethereum presets.
+- Path Comparison for Bitcoin mainnet/testnet and Ethereum.
+- Public CSV/JSON export for comparison results.
+- Unified responsive Wallet Exploration Suite shell with permanent grouped navigation.
+- Public/sensitive context badges and a visible security boundary.
+- Workspace allowlist sanitization on import and export.
+- Security tests proving mnemonic, passphrase, seed, xprv, WIF and private-key extras are not serialized.
+- Path Comparison documentation.
 
 ### Changed
 
-- HD Wallet Explorer официально принял область Wallet Explorer, Seed Explorer и Derivation Explorer из ошибочного roadmap Wallet Key Explorer.
-- Watch-only больше не содержит отдельную реализацию Base58Check и использует общий extended-key parser.
-- Bitcoin path builder и Bitcoin derivation используют общий derivation-path formatter и validator.
-- Seed Explorer хранит mnemonic, passphrase и вычисленные секреты только в состоянии текущей вкладки и не подключён к Workspace/localStorage.
-- Derivation Explorer использует существующие Bitcoin/Ethereum engines и возвращает в UI только публичные результаты.
-- В основной навигации появились отдельные разделы Derivation Explorer и Path Comparison.
-- Path Comparison повторно использует проверенные derivation engines вместо отдельной криптографической реализации.
-- CSV/JSON comparison export не содержит mnemonic, passphrase или приватные ключи.
-- Уточнены границы: descriptors, multisig, PSBT и анализ готовых публичных объектов остаются в Wallet Key Explorer.
-- Recovery, поиск неизвестных derivation paths и wallet fingerprinting остаются в Wallet Recovery Studio.
+- Wallet Explorer, Seed Explorer, Derivation Explorer and Path Comparison now share one application shell.
+- Workspace import no longer returns untrusted objects directly; it rebuilds a sanitized public model.
+- Project scope migrated from the mistaken Wallet Key Explorer roadmap into HD Wallet Explorer.
+- README and TODO were reorganized around the actual product boundaries and remaining hardening tasks.
+- Application and package version updated to `0.11.0`.
 
-### Planned
+### Security
 
-- workspace serialization security tests;
-- Seed Explorer copy controls with explicit warnings;
-- complete BIP32 vector suite;
-- single derivation result export;
-- интеграция модулей в Professional Explorer UI.
+- Sensitive tools remain detached from Workspace and localStorage.
+- Workspace serialization uses explicit field allowlists rather than TypeScript types alone.
+- Network scanning still requires explicit consent and sends only public addresses.
 
 ## 0.10.0 — 2026-07-22
 
-- Fixed React 19 ESLint failures caused by synchronous setState calls inside effects.
-- Added a top-level Workspace and Explorer navigation shell.
-- Added portfolio-style dashboard cards for public wallet data.
+- Fixed React 19 ESLint failures caused by synchronous state updates inside effects.
+- Added top-level Workspace and Explorer navigation.
+- Added portfolio-style public workspace dashboard cards.
 - Added persistent discovery snapshots with balances and usage summaries.
-- Added a public address book with labels, notes, favorites, search and deletion.
+- Added public address book with labels, notes, favorites, search and deletion.
 - Added full public workspace export/import through `wallet-project.json`.
-- Added responsive workspace styling and workspace domain tests.
-- Updated footer version to v0.10.0.
+- Added responsive workspace styling and tests.
 
 ## 0.8.0 — 2026-07-22
 
@@ -68,8 +49,6 @@
 - Added address-gap stopping and per-branch maximum limits.
 - Added discovery progress, cancellation, balances and transaction summaries.
 - Added explicit documentation of hardened multi-account limitations.
-- Added version and MIT License text to the footer.
-- Added discovery helper tests.
 
 ## 0.7.0 — 2026-07-22
 
@@ -78,7 +57,6 @@
 - Added public derivation for external and change branches.
 - Added local public profile storage, loading and deletion.
 - Added CSV/JSON export for watch-only address ranges.
-- Added watch-only domain tests and security documentation.
 
 ## 0.6.0 — 2026-07-22
 
@@ -87,31 +65,25 @@
 - Added request timeout, retry backoff and configurable request delay.
 - Added explicit scan states, progress messages and result summary.
 - Added stricter endpoint validation, including rejection of credentials in URLs.
-- Expanded scanner tests and usage documentation.
 
 ## 0.5.0 — 2026-07-22
 
 - Added opt-in public-address balance scanning.
 - Added Ethereum JSON-RPC and Bitcoin Esplora-compatible adapters.
 - Added gap-limit stopping, progress reporting and cancellation.
-- Added endpoint validation with HTTPS required outside localhost.
-- Added scanner status, balances, transaction counts and error display.
 - Added scanner validation and formatting tests.
 
 ## 0.4.0 — 2026-07-22
 
 - Added local generation of consecutive Ethereum and Bitcoin address ranges.
-- Added a hard limit of 100 addresses per operation.
 - Added public-only range results without displaying private keys or WIF.
-- Added responsive address table, copy controls and CSV/JSON export.
-- Added range validation and export tests.
+- Added responsive address tables and CSV/JSON export.
 
 ## 0.3.0 — 2026-07-22
 
 - Added Bitcoin mainnet/testnet derivation.
 - Added BIP44, BIP49, BIP84 and BIP86 address generation.
 - Added Bitcoin account/change/address index controls.
-- Added local WIF generation and BIP84/BIP86 tests.
 
 ## 0.2.0
 
