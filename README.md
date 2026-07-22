@@ -28,6 +28,10 @@ Recovery, перебор неизвестных путей и идентифик
 - Optional BIP39 passphrase, entropy, wallet seed и master fingerprint.
 - Master xpub и masked master xprv в отдельно включаемом опасном режиме.
 - Автоматическая очистка чувствительной сессии через пять минут.
+- Рабочий Derivation Explorer с произвольным BIP32 path.
+- Presets BIP44, BIP49, BIP84, BIP86 и Ethereum.
+- Разбор purpose, coin type, account, branch и address index.
+- Вывод normalized path, сети, script type, address, public key и derived xpub.
 - Ethereum offline-деривация по `m/44'/60'/0'/0/N`.
 - Bitcoin mainnet/testnet: BIP44, BIP49, BIP84 и BIP86.
 - Генерация одного адреса или диапазона.
@@ -85,6 +89,20 @@ Mnemonic, passphrase и вычисленные секреты находятся
 
 Для безопасной проверки интерфейса используйте встроенную демо-фразу. Рабочую seed-фразу следует исследовать только в изолированной офлайн-среде.
 
+### Derivation Explorer
+
+1. Откройте **Derivation Explorer**.
+2. Введите BIP39 mnemonic и optional passphrase.
+3. Выберите BIP44, BIP49, BIP84, BIP86 или Ethereum preset либо введите произвольный path.
+4. Для Bitcoin preset выберите mainnet или testnet.
+5. Нажмите **Выполнить деривацию**.
+6. Проверьте нормализованный путь, стандарт, сеть, script type, address, public key и derived xpub.
+7. В таблице ниже проверьте каждый уровень: purpose, coin type, account, branch и address index.
+
+Поддерживаются hardened-маркеры `'`, `h` и `H`; они нормализуются к `'`. Для нестандартного BIP32 path приложение выводит публичный ключ и derived xpub, но не придумывает тип адреса, если его невозможно определить из структуры пути.
+
+Derivation Explorer не показывает private key или WIF и не сохраняет результат в Workspace автоматически.
+
 ### Один адрес
 
 1. Откройте Explorer.
@@ -136,14 +154,20 @@ Discovery автоматически проверяет ветки `/0` и `/1` 
 
 ### Derivation Explorer
 
+Реализовано:
+
 - произвольный derivation path;
 - нормализация `'`, `h` и `H`;
 - разбор purpose, coin type, account, change и index;
 - hardened/non-hardened segments;
 - BIP44/BIP49/BIP84/BIP86 presets;
-- receive/change branches;
-- вывод derived key, public key и address;
-- экспорт только публичных результатов.
+- Bitcoin mainnet/testnet и Ethereum presets;
+- receive/change branches через path;
+- вывод public key, derived xpub и address;
+- публичный-only UI;
+- тесты стандартных и custom paths.
+
+Осталось добавить CSV/JSON export публичного результата.
 
 ### Path Comparison
 
@@ -213,6 +237,7 @@ HD Wallet Explorer будет импортировать готовые публ
 - Во внешние API отправляются только публичные адреса.
 - Mnemonic, passphrase, seed, private keys и WIF не отправляются в сеть.
 - Seed Explorer не подключён к Workspace/localStorage и автоматически очищает чувствительную сессию.
+- Derivation Explorer показывает только публичные результаты и не сохраняет их автоматически.
 - HTTPS обязателен вне localhost.
 - URL с credentials отклоняются.
 - Sensitive session не должна сохраняться в `localStorage`, URL, логах или workspace export.
