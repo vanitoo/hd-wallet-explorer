@@ -1,16 +1,4 @@
 import type { NextConfig } from "next";
-
-const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "";
-const isProjectPage = process.env.GITHUB_PAGES === "true" && repositoryName !== "";
-const basePath = isProjectPage ? `/${repositoryName}` : "";
-
-const nextConfig: NextConfig = {
-  output: "export",
-  trailingSlash: true,
-  basePath,
-  assetPrefix: basePath || undefined,
-  images: { unoptimized: true },
-  reactStrictMode: true,
-};
-
-export default nextConfig;
+const isPages = process.env.GITHUB_PAGES === "true";
+const config: NextConfig = { output: "export", trailingSlash: true, images: { unoptimized: true }, ...(isPages ? { basePath: "/hd-wallet-explorer", assetPrefix: "/hd-wallet-explorer/" } : {}) };
+export default config;

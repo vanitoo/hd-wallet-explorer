@@ -1,19 +1,2 @@
-import { AppHeader } from "@/components/layout/app-header";
-import { PathWorkbench } from "@/features/derivation/components/path-workbench";
-
-export default function Home() {
-  return (
-    <div className="app-shell">
-      <div className="app-container">
-        <AppHeader />
-        <main id="main">
-          <PathWorkbench />
-        </main>
-        <footer>
-          <span>HD Wallet Explorer · MIT License</span>
-          <span>Локальная работа · Без аналитики · Без cookies</span>
-        </footer>
-      </div>
-    </div>
-  );
-}
+import { WalletExplorer } from "@/features/wallet/components/wallet-explorer";
+export default function Home() { return <main className="shell"><header><div className="brand"><span>◇</span><div><strong>HD Wallet Explorer</strong><small>Local derivation & discovery</small></div></div><span className="offline">● OFFLINE</span></header><WalletExplorer/><footer>MIT · Без сервера, аналитики и cookies</footer></main>; }
