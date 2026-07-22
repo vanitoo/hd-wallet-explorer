@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo,useState } from "react";
+import { useMemo,useRef,useState } from "react";
 import { bitcoinPath,deriveBitcoin,type BitcoinNetwork,type BitcoinResult,type BitcoinType } from "../domain/bitcoin";
 import { deriveEthereum,inspectMnemonic,type EthereumResult } from "../domain/ethereum";
 import { buildIndexRange,rowsToCsv,rowsToJson,type AddressRow } from "../domain/range";
+import { scanAddressRows,type ScannedAddressRow } from "../domain/scanner";
 
 const DEMO="test test test test test test test test test test test junk";
 type Chain="ethereum"|"bitcoin";
@@ -25,13 +26,20 @@ export function WalletExplorer(){
   const[rangeCount,setRangeCount]=useState(20);
   const[result,setResult]=useState<Result|null>(null);
   const[rows,setRows]=useState<AddressRow[]>([]);
+  const[scannedRows,setScannedRows]=useState<ScannedAddressRow[]>([]);
+  const[endpoint,setEndpoint]=useState("");
+  const[networkEnabled,setNetworkEnabled]=useState(false);
+  const[gapLimit,setGapLimit]=useState(20);
+  const[scanProgress,setScanProgress]=useState(0);
+  const[scanning,setScanning]=useState(false);
   const[error,setError]=useState<string|null>(null);
   const[show,setShow]=useState(false);
+  const abortRef=useRef<AbortController|null>(null);
   const validation=useMemo(()=>inspectMnemonic(mnemonic),[mnemonic]);
   const activeIndex=chain==="ethereum"?ethIndex:index;
   const path=chain==="ethereum"?`m/44'/60'/0'/0/${activeIndex}`:bitcoinPath(type,network,account,change,activeIndex);
 
-  function resetOutput(){setResult(null);setRows([]);setError(null);setShow(false)}
+  function resetOutput(){abortRef.current?.abort();setResult(null);setRows([]);setScannedRows([]);setScanProgress(0);setScanning(false);setError(null);setShow(false)}
   function derive(){
     try{
       resetOutput();
@@ -55,9 +63,21 @@ export function WalletExplorer(){
       setRows(nextRows);
     }catch(e){setError(e instanceof Error?e.message:"Ошибка генерации диапазона")}
   }
+  async function scan(){
+    if(!networkEnabled){setError("Сначала явно разрешите сетевые запросы.");return}
+    const controller=new AbortController();
+    abortRef.current=controller;
+    setScanning(true);setScannedRows([]);setScanProgress(0);setError(null);
+    try{
+      const values=await scanAddressRows({chain,endpoint,rows,gapLimit,signal:controller.signal,onProgress:(completed,total,row)=>{setScanProgress(Math.round(completed/total*100));setScannedRows(current=>[...current,row])}});
+      setScannedRows(values);
+    }catch(e){if(!(e instanceof DOMException&&e.name==="AbortError"))setError(e instanceof Error?e.message:"Ошибка сканирования")}
+    finally{setScanning(false);abortRef.current=null}
+  }
   function clear(){setMnemonic("");setPassphrase("");resetOutput()}
   function download(kind:"csv"|"json"){
-    const body=kind==="csv"?rowsToCsv(rows):rowsToJson(rows);
+    const exportRows=scannedRows.length?scannedRows:rows;
+    const body=kind==="csv"?rowsToCsv(exportRows):rowsToJson(exportRows);
     const blob=new Blob([body],{type:kind==="csv"?"text/csv;charset=utf-8":"application/json;charset=utf-8"});
     const url=URL.createObjectURL(blob);
     const anchor=document.createElement("a");
@@ -65,14 +85,14 @@ export function WalletExplorer(){
   }
 
   return <>
-    <section className="hero"><h1>Откройте любой узел HD-дерева</h1><p>Локально получите один адрес или безопасно сформируйте диапазон публичных адресов. Seed и приватные ключи не отправляются в сеть.</p></section>
+    <section className="hero"><h1>Откройте любой узел HD-дерева</h1><p>Локально получите адреса, затем при явном разрешении проверьте их через собственный RPC/API. Seed и приватные ключи никогда не участвуют в сетевых запросах.</p></section>
     <section className="panel">
       <div className="tabs"><button className={chain==="ethereum"?"active":""} onClick={()=>{setChain("ethereum");resetOutput()}}>Ethereum</button><button className={chain==="bitcoin"?"active":""} onClick={()=>{setChain("bitcoin");resetOutput()}}>Bitcoin</button></div>
-      <div className="subtabs mode-tabs"><button className={mode==="single"?"active":""} onClick={()=>{setMode("single");resetOutput()}}>Один адрес</button><button className={mode==="range"?"active":""} onClick={()=>{setMode("range");resetOutput()}}>Диапазон адресов</button></div>
+      <div className="subtabs mode-tabs"><button className={mode==="single"?"active":""} onClick={()=>{setMode("single");resetOutput()}}>Один адрес</button><button className={mode==="range"?"active":""} onClick={()=>{setMode("range");resetOutput()}}>Диапазон и сканер</button></div>
       {chain==="bitcoin"&&<><div className="subtabs"><button className={network==="mainnet"?"active":""} onClick={()=>{setNetwork("mainnet");resetOutput()}}>Mainnet</button><button className={network==="testnet"?"active":""} onClick={()=>{setNetwork("testnet");resetOutput()}}>Testnet</button></div><div className="types">{([['legacy','Legacy · BIP44'],['nested-segwit','Nested · BIP49'],['native-segwit','Native · BIP84'],['taproot','Taproot · BIP86']] as const).map(([id,title])=><button key={id} className={type===id?"active":""} onClick={()=>{setType(id);resetOutput()}}>{title}</button>)}</div></>}
       {mode==="single"?(chain==="ethereum"?<div className="grid3"><label>Address index<input type="number" min={0} value={ethIndex} onChange={e=>setEthIndex(e.target.valueAsNumber)}/></label></div>:<div className="grid3"><label>Account<input type="number" min={0} value={account} onChange={e=>setAccount(e.target.valueAsNumber)}/></label><label>Chain<select value={change} onChange={e=>setChange(Number(e.target.value) as 0|1)}><option value={0}>External · 0</option><option value={1}>Change · 1</option></select></label><label>Address index<input type="number" min={0} value={index} onChange={e=>setIndex(e.target.valueAsNumber)}/></label></div>):<div className="grid3">{chain==="bitcoin"&&<><label>Account<input type="number" min={0} value={account} onChange={e=>setAccount(e.target.valueAsNumber)}/></label><label>Chain<select value={change} onChange={e=>setChange(Number(e.target.value) as 0|1)}><option value={0}>External · 0</option><option value={1}>Change · 1</option></select></label></>}<label>Начальный индекс<input type="number" min={0} value={rangeStart} onChange={e=>setRangeStart(e.target.valueAsNumber)}/></label><label>Количество, максимум 100<input type="number" min={1} max={100} value={rangeCount} onChange={e=>setRangeCount(e.target.valueAsNumber)}/></label></div>}
       <div className="path">{mode==="single"?path:`${chain==="ethereum"?"m/44'/60'/0'/0":"выбранный Bitcoin-путь"}/{${rangeStart}…${rangeStart+rangeCount-1}}`}</div>
-      <div className="warning">Не вводите рабочую seed-фразу на чужом или заражённом устройстве. Диапазон формируется локально; в таблице сохраняются только публичные данные.</div>
+      <div className="warning">Не вводите рабочую seed-фразу на чужом или заражённом устройстве. Сетевой сканер получает только уже сформированные публичные адреса.</div>
       <label>BIP39 mnemonic<textarea value={mnemonic} onChange={e=>{setMnemonic(e.target.value);resetOutput()}} placeholder="12, 15, 18, 21 или 24 слова"/></label>
       <button className="secondary" onClick={()=>setMnemonic(DEMO)}>Загрузить демо-фразу</button>
       {mnemonic&&<p className={validation.valid?"":"error"}>{validation.valid?`Корректная BIP39-фраза · ${validation.wordCount} слов`:validation.message}</p>}
@@ -80,7 +100,7 @@ export function WalletExplorer(){
       <div className="actions"><button className="primary" disabled={!validation.valid} onClick={mode==="single"?derive:deriveRange}>{mode==="single"?"Получить адрес":"Сформировать диапазон"}</button><button className="secondary" onClick={clear}>Очистить секреты</button></div>
       {error&&<div className="error">{error}</div>}
       {result&&<div className="result"><Row label="Address" value={result.value.address}/><Row label="Public key" value={result.value.publicKey}/>{result.chain==="bitcoin"&&<Row label="WIF" value={show?result.value.wif:"••••••••••••••••••••"}/>}<Row label="Private key" value={show?result.value.privateKey:"••••••••••••••••••••"}/><button className="secondary" onClick={()=>setShow(v=>!v)}>{show?"Скрыть секреты":"Показать приватный ключ и WIF"}</button></div>}
-      {rows.length>0&&<div className="range-result"><div className="range-summary"><div><strong>{rows.length} адресов</strong><span>Индексы {rows[0].index}–{rows.at(-1)?.index}</span></div><div className="actions compact"><button className="secondary" onClick={()=>download("csv")}>Скачать CSV</button><button className="secondary" onClick={()=>download("json")}>Скачать JSON</button></div></div><div className="address-table"><table><thead><tr><th>Index</th><th>Path</th><th>Address</th><th></th></tr></thead><tbody>{rows.map(row=><tr key={row.path}><td>{row.index}</td><td><code>{row.path}</code></td><td><code>{row.address}</code></td><td><CopyButton value={row.address}/></td></tr>)}</tbody></table></div></div>}
+      {rows.length>0&&<><div className="scanner"><div className="scanner-title"><div><strong>Сканирование публичных адресов</strong><span>{chain==="ethereum"?"Ethereum JSON-RPC endpoint":"Bitcoin Esplora-compatible API"}</span></div><label className="network-consent"><input type="checkbox" checked={networkEnabled} onChange={e=>setNetworkEnabled(e.target.checked)}/> Разрешить отправку публичных адресов в указанный API</label></div><div className="grid3"><label>RPC/API endpoint<input value={endpoint} onChange={e=>setEndpoint(e.target.value)} placeholder={chain==="ethereum"?"https://rpc.example.org":"https://mempool.example/api"}/></label><label>Gap limit<input type="number" min={1} max={100} value={gapLimit} onChange={e=>setGapLimit(e.target.valueAsNumber)}/></label></div><div className="actions"><button className="primary" disabled={!networkEnabled||scanning} onClick={scan}>{scanning?`Сканирование · ${scanProgress}%`:"Проверить баланс и историю"}</button>{scanning&&<button className="secondary" onClick={()=>abortRef.current?.abort()}>Остановить</button>}</div>{scanning&&<progress max={100} value={scanProgress}/>}</div><div className="range-result"><div className="range-summary"><div><strong>{rows.length} адресов</strong><span>Индексы {rows[0].index}–{rows.at(-1)?.index}{scannedRows.length?` · проверено ${scannedRows.length}`:""}</span></div><div className="actions compact"><button className="secondary" onClick={()=>download("csv")}>Скачать CSV</button><button className="secondary" onClick={()=>download("json")}>Скачать JSON</button></div></div><div className="address-table"><table><thead><tr><th>Index</th><th>Path</th><th>Address</th>{scannedRows.length>0&&<><th>Balance</th><th>Tx</th><th>Status</th></>}<th></th></tr></thead><tbody>{rows.map(row=>{const scanned=scannedRows.find(item=>item.path===row.path);return <tr key={row.path}><td>{row.index}</td><td><code>{row.path}</code></td><td><code>{row.address}</code></td>{scannedRows.length>0&&<><td>{scanned?.balance??"…"}</td><td>{scanned?.transactionCount??"…"}</td><td><span className={`status ${scanned?.status??"pending"}`}>{scanned?.status==="used"?"Использован":scanned?.status==="unused"?"Пустой":scanned?.status==="error"?"Ошибка":"Ожидание"}</span>{scanned?.error&&<small className="scan-error">{scanned.error}</small>}</td></>}<td><CopyButton value={row.address}/></td></tr>})}</tbody></table></div></div></>}
     </section>
   </>;
 }
