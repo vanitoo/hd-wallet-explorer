@@ -4,6 +4,8 @@ import { ripemd160 } from "@noble/hashes/legacy.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import type { AddressRow } from "./range.ts";
 import type { BitcoinNetwork, BitcoinType } from "./bitcoin.ts";
+import { normalizeExtendedPublicKey, parseExtendedKey } from "./extended-key.ts";
+import { validateChildIndex } from "./derivation-path.ts";
 
 export type WatchKeyPrefix = "xpub" | "ypub" | "zpub" | "tpub" | "upub" | "vpub";
 
@@ -13,6 +15,9 @@ export type WatchKeyInfo = Readonly<{
   type: Exclude<BitcoinType, "taproot">;
   depth: number;
   fingerprint: string;
+  childNumber: number;
+  chainCode: string;
+  publicKey: string;
 }>;
 
 export type WatchProfile = Readonly<{
@@ -22,42 +27,21 @@ export type WatchProfile = Readonly<{
   createdAt: string;
 }>;
 
-const VERSION_INFO: Record<number, Omit<WatchKeyInfo, "depth" | "fingerprint">> = {
-  0x0488b21e: { prefix: "xpub", network: "mainnet", type: "legacy" },
-  0x049d7cb2: { prefix: "ypub", network: "mainnet", type: "nested-segwit" },
-  0x04b24746: { prefix: "zpub", network: "mainnet", type: "native-segwit" },
-  0x043587cf: { prefix: "tpub", network: "testnet", type: "legacy" },
-  0x044a5262: { prefix: "upub", network: "testnet", type: "nested-segwit" },
-  0x045f1cf6: { prefix: "vpub", network: "testnet", type: "native-segwit" },
-};
-
-const PRIVATE_VERSIONS = new Set([
-  0x0488ade4, // xprv
-  0x049d7878, // yprv
-  0x04b2430c, // zprv
-  0x04358394, // tprv
-  0x044a4e28, // uprv
-  0x045f18bc, // vprv
-]);
-
-const STANDARD_VERSION: Record<BitcoinNetwork, number> = {
-  mainnet: 0x0488b21e,
-  testnet: 0x043587cf,
-};
-
 export function inspectWatchKey(value: string): WatchKeyInfo {
-  const decoded = decodeExtendedKey(value);
-  const version = readUint32(decoded, 0);
-  if (PRIVATE_VERSIONS.has(version) || decoded[45] === 0) {
+  const info = parseExtendedKey(value);
+  if (info.kind !== "public") {
     throw new Error("Расширенный ключ не является публичным: Watch-only не принимает приватные ключи.");
   }
-  const info = VERSION_INFO[version];
-  if (!info) throw new Error("Поддерживаются xpub, ypub, zpub, tpub, upub и vpub.");
-  if (decoded[45] !== 2 && decoded[45] !== 3) throw new Error("Расширенный ключ не является публичным.");
+
   return {
-    ...info,
-    depth: decoded[4],
-    fingerprint: toHex(decoded.slice(5, 9)),
+    prefix: info.prefix as WatchKeyPrefix,
+    network: info.network,
+    type: info.type,
+    depth: info.depth,
+    fingerprint: info.parentFingerprint,
+    childNumber: info.childNumber,
+    chainCode: info.chainCode,
+    publicKey: info.keyData,
   };
 }
 
@@ -67,14 +51,14 @@ export function deriveWatchOnlyRange(input: Readonly<{
   start: number;
   count: number;
 }>): AddressRow[] {
-  validateIndex(input.start, "Начальный индекс");
+  validateChildIndex(input.start, "Начальный индекс");
   if (!Number.isInteger(input.count) || input.count < 1 || input.count > 1000) {
     throw new Error("Количество должно быть целым числом от 1 до 1000.");
   }
   if (input.start + input.count - 1 > 0x7fffffff) throw new Error("Диапазон выходит за пределы допустимых индексов.");
 
   const info = inspectWatchKey(input.extendedPublicKey);
-  const normalized = normalizeToStandardExtendedKey(input.extendedPublicKey, info.network);
+  const normalized = normalizeExtendedPublicKey(input.extendedPublicKey);
   const root = HDKey.fromExtendedKey(normalized);
   const branch = root.deriveChild(input.change);
 
@@ -114,32 +98,6 @@ export function parseWatchProfiles(value: string | null): WatchProfile[] {
   }
 }
 
-function normalizeToStandardExtendedKey(value: string, network: BitcoinNetwork): string {
-  const decoded = decodeExtendedKey(value);
-  writeUint32(decoded, 0, STANDARD_VERSION[network]);
-  return encodeChecked(decoded);
-}
-
-function decodeExtendedKey(value: string): Uint8Array {
-  const trimmed = value.trim();
-  let decoded: Uint8Array;
-  try {
-    decoded = base58.decode(trimmed);
-  } catch {
-    throw new Error("Расширенный публичный ключ имеет неверный Base58-формат.");
-  }
-  if (decoded.length !== 82) throw new Error("Расширенный публичный ключ должен содержать 78 байт данных.");
-  const payload = decoded.slice(0, 78);
-  const checksum = decoded.slice(78);
-  const expected = sha256(sha256(payload)).slice(0, 4);
-  if (!equalBytes(checksum, expected)) throw new Error("Контрольная сумма расширенного ключа не совпадает.");
-  return payload;
-}
-
-function encodeChecked(payload: Uint8Array): string {
-  return base58.encode(concat(payload, sha256(sha256(payload)).slice(0, 4)));
-}
-
 function addressFromPublicKey(
   publicKey: Uint8Array,
   network: BitcoinNetwork,
@@ -157,6 +115,10 @@ function addressFromPublicKey(
   return bech32.encode(network === "mainnet" ? "bc" : "tb", [0, ...bech32.toWords(keyHash)], 90);
 }
 
+function encodeChecked(payload: Uint8Array): string {
+  return base58.encode(concat(payload, sha256(sha256(payload)).slice(0, 4)));
+}
+
 function isWatchProfile(value: unknown): value is WatchProfile {
   if (!value || typeof value !== "object") return false;
   const profile = value as Partial<WatchProfile>;
@@ -164,24 +126,7 @@ function isWatchProfile(value: unknown): value is WatchProfile {
     typeof profile.extendedPublicKey === "string" && typeof profile.createdAt === "string";
 }
 
-function validateIndex(value: number, label: string) {
-  if (!Number.isInteger(value) || value < 0 || value > 0x7fffffff) {
-    throw new Error(`${label} должен быть целым числом от 0 до 2147483647.`);
-  }
-}
-
-function readUint32(value: Uint8Array, offset: number) {
-  return ((value[offset] * 0x1000000) + (value[offset + 1] << 16) + (value[offset + 2] << 8) + value[offset + 3]) >>> 0;
-}
-
-function writeUint32(value: Uint8Array, offset: number, number: number) {
-  value[offset] = (number >>> 24) & 0xff;
-  value[offset + 1] = (number >>> 16) & 0xff;
-  value[offset + 2] = (number >>> 8) & 0xff;
-  value[offset + 3] = number & 0xff;
-}
-
-function concat(...parts: Uint8Array[]) {
+function concat(...parts: Uint8Array[]): Uint8Array {
   const result = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
   let offset = 0;
   for (const part of parts) {
@@ -191,10 +136,6 @@ function concat(...parts: Uint8Array[]) {
   return result;
 }
 
-function equalBytes(left: Uint8Array, right: Uint8Array) {
-  return left.length === right.length && left.every((byte, index) => byte === right[index]);
-}
-
-function toHex(value: Uint8Array) {
+function toHex(value: Uint8Array): string {
   return Array.from(value, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
