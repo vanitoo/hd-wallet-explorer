@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 — 2026-07-22
+
+- Added Bitcoin watch-only mode without mnemonic or private keys.
+- Added xpub, ypub, zpub, tpub, upub and vpub parsing with checksum validation.
+- Added public derivation for external and change branches.
+- Added local public profile storage, loading and deletion.
+- Added CSV/JSON export for watch-only address ranges.
+- Added watch-only domain tests and security documentation.
+
 ## 0.6.0 — 2026-07-22
 
 - Finished the runnable scanner workflow in the browser UI.
