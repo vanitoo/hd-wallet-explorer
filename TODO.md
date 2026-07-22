@@ -1,4 +1,4 @@
-# TODO
+# TODO — HD Wallet Explorer
 
 ## Completed
 
@@ -17,31 +17,83 @@
 - [x] Workspace dashboard and discovery history
 - [x] Public address notes, favorites and search
 - [x] Public workspace JSON import/export
+- [x] Adopt Wallet Explorer scope from Wallet Key Explorer roadmap
 
-## v1.0 — Professional Explorer
+## v1.0 — Wallet Exploration Suite
 
-- [ ] Replace top-level tab navigation with permanent sidebar navigation
-- [ ] Add Dashboard as the default landing page
-- [ ] Split application into Workspace, Bitcoin, Ethereum, Settings and About sections
-- [ ] Add reusable stat cards and summary panels
-- [ ] Add recent discovery and recent workspace activity blocks
-- [ ] Add portfolio summary based on public workspace data
-- [ ] Improve tables with sorting, filtering and search
-- [ ] Add quick actions for common workflows
-- [ ] Improve responsive desktop-first layout
-- [ ] Optimize rendering for large address ranges
-- [ ] Complete v1.0 user documentation
+### Foundation
 
-## v1.1 — Descriptor Explorer
+- [ ] Audit existing BIP39, BIP32, Bitcoin and Ethereum derivation modules
+- [ ] Define canonical derivation-path model
+- [ ] Define ephemeral sensitive-session model
+- [ ] Guarantee secrets never enter localStorage, URL, logs or workspace export
+- [ ] Add security tests for workspace serialization
 
-- [ ] Descriptor parser and checksum validation
-- [ ] Support `wpkh()`
-- [ ] Support `sh(wpkh())`
-- [ ] Support `tr()`
-- [ ] Support `combo()`
-- [ ] Support `sortedmulti()`
-- [ ] Descriptor import/export
-- [ ] Descriptor structure visualization
+### Seed Explorer
+
+- [ ] BIP39 mnemonic validation
+- [ ] Support 12/15/18/21/24 words
+- [ ] Optional BIP39 passphrase
+- [ ] Display entropy
+- [ ] Display mnemonic checksum status
+- [ ] Display wallet seed with masking
+- [ ] Display master fingerprint
+- [ ] Display master xpub
+- [ ] Dangerous opt-in display for xprv
+- [ ] Copy controls with explicit warnings
+- [ ] Manual clear-sensitive-data action
+- [ ] Automatic sensitive-session timeout
+- [ ] Official BIP39 and BIP32 vector tests
+
+### Derivation Explorer
+
+- [ ] Arbitrary derivation path input
+- [ ] Normalize `'`, `h` and `H`
+- [ ] Validate hardened and non-hardened segments
+- [ ] Explain purpose, coin type, account, change and index
+- [ ] BIP44 preset
+- [ ] BIP49 preset
+- [ ] BIP84 preset
+- [ ] BIP86 preset
+- [ ] Receive/change branches
+- [ ] Derive public key and address
+- [ ] Export only public results
+- [ ] Add derivation-path parser tests
+
+### Path Comparison
+
+- [ ] Compare BIP44/BIP49/BIP84/BIP86 from one seed
+- [ ] Show path, standard, script type, address and public key
+- [ ] Bitcoin mainnet/testnet comparison
+- [ ] Ethereum standard-path comparison
+- [ ] Explain why one seed creates different addresses
+- [ ] CSV/JSON export
+- [ ] Comparison vector tests
+
+### Professional Explorer UI
+
+- [ ] Permanent sidebar navigation
+- [ ] Dashboard as default landing page
+- [ ] Sections: Workspace, Seed, Derivation, Bitcoin, Ethereum, Settings, About
+- [ ] Reusable stat cards and summary panels
+- [ ] Recent discovery and workspace activity
+- [ ] Public portfolio summary
+- [ ] Better sorting, filtering and search
+- [ ] Quick actions
+- [ ] Responsive desktop-first layout
+- [ ] Optimize large address ranges
+- [ ] Complete v1.0 documentation
+
+## v1.1 — Descriptor Integration
+
+Descriptor creation and deep diagnostics stay in Wallet Key Explorer. HD Wallet Explorer imports descriptors for watch-only exploration.
+
+- [ ] Descriptor import
+- [ ] Descriptor checksum validation
+- [ ] `wpkh()` watch-only profile
+- [ ] `sh(wpkh())` watch-only profile
+- [ ] `tr()` watch-only profile
+- [ ] `sortedmulti()` watch-only profile
 - [ ] Multi-account public profile sets
 - [ ] Taproot BIP86 watch-only policy
 
@@ -86,12 +138,18 @@
 
 ## Security and maintenance
 
-- [ ] Encrypted optional profile backup
+- [ ] Encrypted optional public-profile backup
 - [ ] Independent security audit
 - [ ] Threat model documentation
 - [ ] Dependency and supply-chain review
 - [ ] Accessibility audit
 
-## Out of scope
+## Project boundaries
 
-Wallet recovery, unknown derivation-path scanning and wallet fingerprinting belong to the separate **Wallet Recovery Studio** project.
+### Wallet Key Explorer
+
+Owns analysis of existing public cryptographic objects: extended public keys, descriptors, multisig, addresses and PSBT.
+
+### Wallet Recovery Studio
+
+Owns recovery, unknown derivation-path scanning, wallet fingerprinting and ranked search.
