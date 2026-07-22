@@ -1,21 +1,47 @@
 # HD Wallet Explorer
 
-Локальный open-source инструмент для исследования HD-кошельков, генерации адресов, watch-only discovery и ведения публичного wallet workspace.
+Локальный open-source инструмент для исследования HD-кошельков, BIP39 seed, derivation paths, генерации адресов, watch-only discovery и ведения публичного wallet workspace.
 
 > Текущая версия: **v0.10.0**
 
-## Возможности
+## Назначение
 
+HD Wallet Explorer отвечает за работу с известной структурой кошелька:
+
+- Wallet Explorer;
+- Seed Explorer;
+- Derivation Explorer;
+- BIP39 mnemonic и optional passphrase;
+- получение wallet seed и master keys;
+- генерацию Bitcoin и Ethereum адресов;
+- сравнение BIP44/BIP49/BIP84/BIP86 derivation paths;
+- watch-only profiles;
+- discovery и публичный workspace.
+
+Функции анализа отдельных публичных объектов — descriptors, multisig, PSBT и инспекция готовых публичных ключей — остаются в отдельном проекте **Wallet Key Explorer**.
+
+Recovery, перебор неизвестных путей и идентификация неизвестного кошелька относятся к **Wallet Recovery Studio**.
+
+## Текущие возможности
+
+- Рабочий Seed Explorer с BIP39 validation для 12/15/18/21/24 слов.
+- Optional BIP39 passphrase, entropy, wallet seed и master fingerprint.
+- Master xpub и masked master xprv в отдельно включаемом опасном режиме.
+- Автоматическая очистка чувствительной сессии через пять минут.
+- Рабочий Derivation Explorer с произвольным BIP32 path.
+- Presets BIP44, BIP49, BIP84, BIP86 и Ethereum.
+- Разбор purpose, coin type, account, branch и address index.
+- Вывод normalized path, сети, script type, address, public key и derived xpub.
 - Ethereum offline-деривация по `m/44'/60'/0'/0/N`.
 - Bitcoin mainnet/testnet: BIP44, BIP49, BIP84 и BIP86.
 - Генерация одного адреса или диапазона.
 - Сканирование публичных адресов через Ethereum JSON-RPC или Bitcoin Esplora.
-- Watch-only режим без seed-фразы и приватных ключей.
+- Watch-only без seed-фразы и приватных ключей.
 - Импорт `xpub`, `ypub`, `zpub`, `tpub`, `upub`, `vpub`.
-- Discovery веток `External / 0` и `Change / 1` с address gap.
+- Discovery веток External `/0` и Change `/1` с address gap.
 - Wallet Workspace: сводка, история discovery, адресная книга, заметки и избранное.
-- Экспорт и импорт всего публичного проекта через `wallet-project.json`.
-- CSV/JSON экспорт списков адресов.
+- Экспорт и импорт публичного проекта через `wallet-project.json`.
+- CSV/JSON экспорт адресов.
 
 ## Запуск
 
@@ -26,203 +52,197 @@ npm install
 npm run dev
 ```
 
-Откройте:
+Откройте `http://localhost:3000`.
 
-```text
-http://localhost:3000
-```
-
-Полная проверка проекта:
+Полная проверка:
 
 ```bash
 npm run check
 ```
 
-Команда последовательно запускает TypeScript, ESLint, тесты и production build.
+Команда запускает TypeScript, ESLint, тесты и production build.
 
-# Как пользоваться
+## Основные сценарии
 
-## 1. Workspace
+### Workspace
 
-После запуска открывается раздел **Workspace**. Он хранит только публичную информацию в `localStorage` браузера.
+Workspace хранит только публичные данные в `localStorage`:
 
-На главной панели отображаются:
+- watch-only профили;
+- discovery snapshots;
+- публичные адреса;
+- названия, заметки и избранное.
 
-- число watch-only профилей;
-- число сохранённых запусков discovery;
-- количество проверенных и использованных адресов;
-- суммарный обнаруженный Bitcoin-баланс;
-- количество избранных адресов.
+Seed, mnemonic passphrase, wallet seed и приватные ключи не должны попадать в Workspace или `wallet-project.json`.
 
-Кнопка **Обновить данные** перечитывает результаты из браузерного хранилища после работы во вкладке Explorer.
+### Seed Explorer
 
-### Адресная книга
+1. Откройте **Seed Explorer** в верхней навигации.
+2. Введите BIP39 mnemonic из 12, 15, 18, 21 или 24 английских слов.
+3. При необходимости укажите BIP39 passphrase.
+4. Нажмите **Проверить seed**.
+5. Проверьте entropy, checksum, master fingerprint и master xpub.
+6. Wallet seed и master xprv по умолчанию замаскированы и раскрываются отдельными кнопками.
+7. После работы нажмите **Очистить чувствительные данные**.
 
-Можно вручную добавить публичный Bitcoin- или Ethereum-адрес:
+Mnemonic, passphrase и вычисленные секреты находятся только в состоянии текущей вкладки. Они не записываются в Workspace или localStorage. Сессия автоматически очищается через пять минут бездействия.
 
-1. Выберите сеть.
-2. Укажите название, например `Cold Wallet`.
-3. Вставьте публичный адрес.
-4. Добавьте заметку.
-5. Нажмите **Добавить адрес**.
+Для безопасной проверки интерфейса используйте встроенную демо-фразу. Рабочую seed-фразу следует исследовать только в изолированной офлайн-среде.
 
-Адрес можно отметить звездой, найти через поиск или удалить. Приватные ключи и seed в адресной книге не используются.
+### Derivation Explorer
 
-### Экспорт workspace
+1. Откройте **Derivation Explorer**.
+2. Введите BIP39 mnemonic и optional passphrase.
+3. Выберите BIP44, BIP49, BIP84, BIP86 или Ethereum preset либо введите произвольный path.
+4. Для Bitcoin preset выберите mainnet или testnet.
+5. Нажмите **Выполнить деривацию**.
+6. Проверьте нормализованный путь, стандарт, сеть, script type, address, public key и derived xpub.
+7. В таблице ниже проверьте каждый уровень: purpose, coin type, account, branch и address index.
 
-Нажмите **Экспорт workspace**. Браузер сохранит файл:
+Поддерживаются hardened-маркеры `'`, `h` и `H`; они нормализуются к `'`. Для нестандартного BIP32 path приложение выводит публичный ключ и derived xpub, но не придумывает тип адреса, если его невозможно определить из структуры пути.
 
-```text
-wallet-project.json
-```
+Derivation Explorer не показывает private key или WIF и не сохраняет результат в Workspace автоматически.
 
-Он содержит:
+### Один адрес
 
-- название workspace;
-- публичные watch-only профили;
-- сохранённые результаты discovery;
-- публичные адреса, заметки и избранное.
+1. Откройте Explorer.
+2. Выберите Ethereum или Bitcoin.
+3. Для Bitcoin укажите сеть и стандарт.
+4. Укажите account, branch и index.
+5. Введите BIP39 mnemonic и optional passphrase.
+6. Получите адрес локально.
 
-Для восстановления нажмите **Импорт JSON** и выберите ранее сохранённый файл.
+Для реальных средств предпочтителен Watch-only. Рабочую seed-фразу не рекомендуется вводить в обычный браузерный профиль.
 
-## 2. Explorer: один адрес
+### Диапазон и сканер
 
-1. Откройте **Explorer**.
-2. Выберите **Один адрес**.
-3. Выберите Ethereum или Bitcoin.
-4. Для Bitcoin выберите сеть и тип адреса.
-5. Укажите account, ветку и индекс.
-6. Введите BIP39 mnemonic и необязательную passphrase.
-7. Нажмите **Получить адрес**.
+Можно локально сформировать диапазон адресов, а затем отдельно разрешить отправку только публичных адресов в Bitcoin Esplora или Ethereum JSON-RPC.
 
-Деривация выполняется локально в браузере.
+Сканер поддерживает gap limit, timeout, retries, delay, остановку, прогресс, баланс и число транзакций.
 
-Для проверки интерфейса используйте встроенную демо-фразу. Рабочую seed-фразу рекомендуется не вводить в браузер вообще — для регулярной работы безопаснее Watch-only.
+### Watch-only и Discovery
 
-## 3. Диапазон и сканер
+Watch-only принимает account-level `xpub/ypub/zpub/tpub/upub/vpub`, генерирует External и Change branches и сохраняет только публичный профиль.
 
-1. Откройте **Диапазон и сканер**.
-2. Укажите начальный индекс и число адресов.
-3. Нажмите **Сформировать диапазон**.
-4. Проверьте endpoint.
-5. Разрешите отправку публичных адресов в API.
-6. Нажмите **Запустить сканер**.
+Discovery автоматически проверяет ветки `/0` и `/1` до address gap или защитного лимита.
 
-### Bitcoin
+Из account-level xpub невозможно вывести соседние hardened accounts. Для multi-account discovery потребуются отдельные account xpub или descriptors.
 
-По умолчанию используется Esplora API:
+# Roadmap
 
-```text
-https://mempool.space/api
-```
+## v1.0 — Wallet Exploration Suite
 
-Для testnet автоматически используется соответствующий testnet endpoint.
+Главный ближайший этап, перенесённый из ошибочного roadmap Wallet Key Explorer.
 
-### Ethereum
+### Seed Explorer
 
-Нужен Ethereum JSON-RPC endpoint, который разрешает браузерные CORS-запросы.
+Реализовано базовое ядро и интерфейс:
 
-Сканер поддерживает:
+- проверка BIP39 mnemonic;
+- 12/15/18/21/24 слов;
+- optional passphrase;
+- entropy и mnemonic checksum;
+- wallet seed;
+- master fingerprint;
+- master xpub;
+- xprv только в отдельно включаемом опасном режиме;
+- маскирование секретов;
+- ручная и автоматическая очистка sensitive session;
+- полный запрет сохранения секретов в Workspace.
 
-- gap limit;
-- таймаут;
-- повторные попытки;
-- паузу между запросами;
-- остановку;
-- прогресс;
-- баланс, число транзакций и статус адреса.
+Осталось добавить copy controls с явными предупреждениями, security tests сериализации Workspace и полный набор BIP32 vectors.
 
-## 4. Watch-only
+### Derivation Explorer
 
-Watch-only позволяет исследовать Bitcoin-кошелёк без mnemonic и приватных ключей.
+Реализовано:
 
-Поддерживаются:
+- произвольный derivation path;
+- нормализация `'`, `h` и `H`;
+- разбор purpose, coin type, account, change и index;
+- hardened/non-hardened segments;
+- BIP44/BIP49/BIP84/BIP86 presets;
+- Bitcoin mainnet/testnet и Ethereum presets;
+- receive/change branches через path;
+- вывод public key, derived xpub и address;
+- публичный-only UI;
+- тесты стандартных и custom paths.
 
-| Ключ | Сеть | Формат |
-|---|---|---|
-| `xpub` | mainnet | Legacy |
-| `ypub` | mainnet | Nested SegWit |
-| `zpub` | mainnet | Native SegWit |
-| `tpub` | testnet | Legacy |
-| `upub` | testnet | Nested SegWit |
-| `vpub` | testnet | Native SegWit |
+Осталось добавить CSV/JSON export публичного результата.
 
-Порядок работы:
+### Path Comparison
 
-1. Получите account-level публичный ключ из кошелька или аппаратного устройства.
-2. Откройте **Explorer → Watch-only**.
-3. Вставьте расширенный публичный ключ.
-4. Убедитесь, что сеть и формат определены правильно.
-5. Для ручной генерации выберите ветку, начальный индекс и количество.
-6. Для сохранения укажите имя профиля и нажмите **Сохранить публичный профиль**.
+- один seed в BIP44/BIP49/BIP84/BIP86;
+- сравнение path, script type, address и public key;
+- Bitcoin mainnet/testnet;
+- Ethereum standard paths;
+- объяснение, почему один seed создаёт разные адреса;
+- табличный экспорт результатов.
 
-Сохранённый профиль содержит только имя, xpub-подобный ключ и дату создания.
+### Professional Explorer UI
 
-## 5. Discovery Engine
+- постоянная боковая навигация;
+- Dashboard;
+- разделы Workspace, Seed, Derivation, Bitcoin, Ethereum, Settings и About;
+- улучшенные таблицы, фильтры и быстрые действия;
+- responsive desktop-first UX;
+- оптимизация больших диапазонов;
+- полная документация v1.0.
 
-Discovery автоматически проверяет обе ветки текущего account-level ключа:
+## v1.1 — Descriptor Integration
 
-```text
-External / 0
-Change   / 1
-```
+HD Wallet Explorer будет импортировать готовые публичные descriptors для watch-only и multi-account профилей. Создание и глубокая диагностика descriptor остаются в Wallet Key Explorer.
 
-Настройки:
+- descriptor import;
+- checksum validation;
+- `wpkh`, `sh(wpkh)`, `tr`, `sortedmulti` watch-only profiles;
+- multi-account public profile sets;
+- BIP86 watch-only policy.
 
-- **Address gap** — сколько пустых адресов подряд завершает проверку ветки;
-- **Максимум адресов на ветку** — защитный предел;
-- **Bitcoin Esplora API** — endpoint для проверки публичной истории.
+## v1.2 — Hardware Wallet Center
 
-Порядок работы:
+- Ledger, Trezor, Coldcard, Jade и Keystone;
+- read-only получение fingerprint, xpub и descriptors;
+- проверка первых адресов;
+- информация об устройстве без доступа к приватным ключам.
 
-1. Вставьте watch-only ключ.
-2. Настройте address gap.
-3. Разрешите отправку публичных адресов в API.
-4. Нажмите **Запустить discovery**.
-5. Дождитесь завершения или нажмите **Остановить**.
+## v1.3 — Blockchain Explorer
 
-После успешного завершения результат автоматически сохраняется в Workspace. Там отображаются дата, сеть, число использованных адресов и найденный баланс.
+- нормализованная история транзакций;
+- UTXO viewer;
+- inputs, outputs и fees;
+- explorer links;
+- script analysis;
+- фильтрация и экспорт.
 
-## Ограничения
+## v1.4 — Portfolio
 
-### Multi-account discovery
+- Bitcoin и Ethereum summary;
+- группировка по profiles и labels;
+- historical balances;
+- EVM token balances;
+- reports и export.
 
-Из account-level `xpub` нельзя получить соседние аккаунты `account 1`, `account 2` и далее. Уровень account в BIP44 использует hardened-деривацию.
+## v1.5 — Plugin SDK
 
-Для настоящего multi-account discovery нужны:
+- block explorer providers;
+- RPC providers;
+- export formats;
+- report generators;
+- дополнительные сети и диагностические модули.
 
-- отдельные публичные ключи каждого аккаунта;
-- либо wallet descriptors;
-- либо экспорт из кошелька с полной публичной структурой.
-
-### Taproot watch-only
-
-BIP86 watch-only пока не включён. Обычный `xpub` не сообщает однозначно, что его нужно интерпретировать как Taproot-политику.
-
-### История транзакций
-
-В v0.10.0 Workspace хранит сводные результаты discovery и публичные адреса. Полная нормализованная лента транзакций с входами, выходами и комиссиями будет отдельным следующим этапом.
-
-# Безопасность
+## Безопасность
 
 - Деривация выполняется локально.
 - Сетевой режим выключен до явного согласия.
-- В API отправляются только публичные адреса.
-- Mnemonic, passphrase, seed, приватные ключи и WIF в RPC/API не отправляются.
-- Для внешних endpoint разрешён HTTPS.
-- HTTP допускается только для localhost.
-- URL с логином и паролем отклоняются.
-- Workspace и профили хранятся только в браузере, пока пользователь сам не экспортирует JSON.
+- Во внешние API отправляются только публичные адреса.
+- Mnemonic, passphrase, seed, private keys и WIF не отправляются в сеть.
+- Seed Explorer не подключён к Workspace/localStorage и автоматически очищает чувствительную сессию.
+- Derivation Explorer показывает только публичные результаты и не сохраняет их автоматически.
+- HTTPS обязателен вне localhost.
+- URL с credentials отклоняются.
+- Sensitive session не должна сохраняться в `localStorage`, URL, логах или workspace export.
 
-Рекомендуемый сценарий для реальных средств:
-
-1. Получить публичный ключ на аппаратном кошельке.
-2. Использовать Watch-only.
-3. Не вводить рабочую seed-фразу в веб-приложение.
-4. Проверить первые адреса в исходном кошельке.
-5. Хранить экспортированный workspace как публичные данные, но всё равно не публиковать его без необходимости.
-
-> Проект находится на ранней стадии и не проходил независимый аудит безопасности.
+> Проект не проходил независимый аудит безопасности. Для реальных средств используйте изолированную среду и проверяйте первые адреса в исходном кошельке.
 
 ## Лицензия
 
