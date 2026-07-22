@@ -4,11 +4,167 @@ import { mnemonicToSeedSync } from "@scure/bip39";
 import { secp256k1 } from "@noble/curves/secp256k1.js";
 import { ripemd160 } from "@noble/hashes/legacy.js";
 import { sha256 } from "@noble/hashes/sha2.js";
-import { inspectMnemonic } from "./ethereum";
-export type BitcoinType="legacy"|"nested-segwit"|"native-segwit"|"taproot";export type BitcoinNetwork="mainnet"|"testnet";export type BitcoinResult=Readonly<{address:string;publicKey:string;privateKey:string;wif:string}>;
-const ORDER=BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");const PURPOSE:Record<BitcoinType,number>={legacy:44,"nested-segwit":49,"native-segwit":84,taproot:86};
-export function bitcoinPath(type:BitcoinType,network:BitcoinNetwork,account:number,change:0|1,index:number){for(const n of [account,index])if(!Number.isInteger(n)||n<0||n>0x7fffffff)throw new Error("Индекс должен быть целым от 0 до 2147483647.");return`m/${PURPOSE[type]}'/${network==="mainnet"?0:1}'/${account}'/${change}/${index}`;}
-export function deriveBitcoin(i:Readonly<{mnemonic:string;passphrase:string;path:string;network:BitcoinNetwork;type:BitcoinType}>):BitcoinResult{const v=inspectMnemonic(i.mnemonic);if(!v.valid)throw new Error(v.message);const prefix=`m/${PURPOSE[i.type]}'/${i.network==="mainnet"?0:1}'/`;if(!i.path.startsWith(prefix))throw new Error(`Путь должен начинаться с ${prefix}`);const seed=mnemonicToSeedSync(v.normalized,i.passphrase.normalize("NFKD"));const root=HDKey.fromMasterSeed(seed);const child=root.derive(i.path);try{if(!child.privateKey)throw new Error("Приватный ключ не получен.");const pub=secp256k1.getPublicKey(child.privateKey,true);return{address:address(pub,child.privateKey,i.network,i.type),publicKey:hex(pub),privateKey:hex(child.privateKey),wif:wif(child.privateKey,i.network)};}finally{seed.fill(0);root.wipePrivateData();child.wipePrivateData();}}
-function address(pub:Uint8Array,priv:Uint8Array,net:BitcoinNetwork,type:BitcoinType){const h=hash160(pub);if(type==="legacy")return check(join(Uint8Array.of(net==="mainnet"?0:0x6f),h));if(type==="nested-segwit")return check(join(Uint8Array.of(net==="mainnet"?5:0xc4),hash160(join(Uint8Array.of(0,20),h))));const hrp=net==="mainnet"?"bc":"tb";if(type==="native-segwit")return bech32.encode(hrp,[0,...bech32.toWords(h)],90);const x=taproot(priv);return bech32m.encode(hrp,[1,...bech32m.toWords(x)],90);}
-function taproot(priv:Uint8Array){const pub=secp256k1.getPublicKey(priv,true);const x=pub.slice(1);let d=big(priv);if(pub[0]===3)d=ORDER-d;const tag=sha256(new TextEncoder().encode("TapTweak"));const t=big(sha256(join(tag,tag,x)));if(t>=ORDER)throw new Error("Некорректный Taproot tweak.");const q=(d+t)%ORDER;if(q===BigInt(0))throw new Error("Некорректный Taproot key.");return secp256k1.getPublicKey(bytes(q),true).slice(1);}
-function wif(k:Uint8Array,n:BitcoinNetwork){return check(join(Uint8Array.of(n==="mainnet"?0x80:0xef),k,Uint8Array.of(1)));}function check(p:Uint8Array){return base58.encode(join(p,sha256(sha256(p)).slice(0,4)));}function hash160(v:Uint8Array){return ripemd160(sha256(v));}function join(...p:Uint8Array[]){const r=new Uint8Array(p.reduce((s,v)=>s+v.length,0));let o=0;for(const v of p){r.set(v,o);o+=v.length}return r;}function hex(v:Uint8Array){return Array.from(v,b=>b.toString(16).padStart(2,"0")).join("");}function big(v:Uint8Array){return BigInt(`0x${hex(v)}`);}function bytes(v:bigint){const h=v.toString(16).padStart(64,"0");return Uint8Array.from(h.match(/.{2}/gu)??[],x=>Number.parseInt(x,16));}
+import { inspectMnemonic } from "./ethereum.ts";
+
+export type BitcoinType = "legacy" | "nested-segwit" | "native-segwit" | "taproot";
+export type BitcoinNetwork = "mainnet" | "testnet";
+export type BitcoinResult = Readonly<{
+  address: string;
+  publicKey: string;
+  privateKey: string;
+  wif: string;
+}>;
+
+const ORDER = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
+const PURPOSE: Record<BitcoinType, number> = {
+  legacy: 44,
+  "nested-segwit": 49,
+  "native-segwit": 84,
+  taproot: 86,
+};
+
+export function bitcoinPath(
+  type: BitcoinType,
+  network: BitcoinNetwork,
+  account: number,
+  change: 0 | 1,
+  index: number,
+) {
+  for (const value of [account, index]) {
+    if (!Number.isInteger(value) || value < 0 || value > 0x7fffffff) {
+      throw new Error("Индекс должен быть целым от 0 до 2147483647.");
+    }
+  }
+
+  return `m/${PURPOSE[type]}'/${network === "mainnet" ? 0 : 1}'/${account}'/${change}/${index}`;
+}
+
+export function deriveBitcoin(
+  input: Readonly<{
+    mnemonic: string;
+    passphrase: string;
+    path: string;
+    network: BitcoinNetwork;
+    type: BitcoinType;
+  }>,
+): BitcoinResult {
+  const validation = inspectMnemonic(input.mnemonic);
+  if (!validation.valid) throw new Error(validation.message);
+
+  const prefix = `m/${PURPOSE[input.type]}'/${input.network === "mainnet" ? 0 : 1}'/`;
+  if (!input.path.startsWith(prefix)) {
+    throw new Error(`Путь должен начинаться с ${prefix}`);
+  }
+
+  const seed = mnemonicToSeedSync(
+    validation.normalized,
+    input.passphrase.normalize("NFKD"),
+  );
+  const root = HDKey.fromMasterSeed(seed);
+  const child = root.derive(input.path);
+
+  try {
+    if (!child.privateKey) throw new Error("Приватный ключ не получен.");
+    const publicKey = secp256k1.getPublicKey(child.privateKey, true);
+
+    return {
+      address: deriveAddress(publicKey, child.privateKey, input.network, input.type),
+      publicKey: toHex(publicKey),
+      privateKey: toHex(child.privateKey),
+      wif: encodeWif(child.privateKey, input.network),
+    };
+  } finally {
+    seed.fill(0);
+    root.wipePrivateData();
+    child.wipePrivateData();
+  }
+}
+
+function deriveAddress(
+  publicKey: Uint8Array,
+  privateKey: Uint8Array,
+  network: BitcoinNetwork,
+  type: BitcoinType,
+) {
+  const publicKeyHash = hash160(publicKey);
+
+  if (type === "legacy") {
+    return base58Check(concat(Uint8Array.of(network === "mainnet" ? 0 : 0x6f), publicKeyHash));
+  }
+
+  if (type === "nested-segwit") {
+    const redeemScript = concat(Uint8Array.of(0, 20), publicKeyHash);
+    return base58Check(
+      concat(
+        Uint8Array.of(network === "mainnet" ? 5 : 0xc4),
+        hash160(redeemScript),
+      ),
+    );
+  }
+
+  const humanReadablePart = network === "mainnet" ? "bc" : "tb";
+  if (type === "native-segwit") {
+    return bech32.encode(humanReadablePart, [0, ...bech32.toWords(publicKeyHash)], 90);
+  }
+
+  const outputKey = taprootOutputKey(privateKey);
+  return bech32m.encode(humanReadablePart, [1, ...bech32m.toWords(outputKey)], 90);
+}
+
+function taprootOutputKey(privateKey: Uint8Array) {
+  const publicKey = secp256k1.getPublicKey(privateKey, true);
+  const xOnlyPublicKey = publicKey.slice(1);
+  let secret = bytesToBigInt(privateKey);
+
+  if (publicKey[0] === 3) secret = ORDER - secret;
+
+  const tagHash = sha256(new TextEncoder().encode("TapTweak"));
+  const tweak = bytesToBigInt(sha256(concat(tagHash, tagHash, xOnlyPublicKey)));
+  if (tweak >= ORDER) throw new Error("Некорректный Taproot tweak.");
+
+  const outputSecret = (secret + tweak) % ORDER;
+  if (outputSecret === BigInt(0)) throw new Error("Некорректный Taproot key.");
+
+  return secp256k1.getPublicKey(bigIntToBytes(outputSecret), true).slice(1);
+}
+
+function encodeWif(privateKey: Uint8Array, network: BitcoinNetwork) {
+  return base58Check(
+    concat(
+      Uint8Array.of(network === "mainnet" ? 0x80 : 0xef),
+      privateKey,
+      Uint8Array.of(1),
+    ),
+  );
+}
+
+function base58Check(payload: Uint8Array) {
+  return base58.encode(concat(payload, sha256(sha256(payload)).slice(0, 4)));
+}
+
+function hash160(value: Uint8Array) {
+  return ripemd160(sha256(value));
+}
+
+function concat(...parts: Uint8Array[]) {
+  const result = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    result.set(part, offset);
+    offset += part.length;
+  }
+  return result;
+}
+
+function toHex(value: Uint8Array) {
+  return Array.from(value, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function bytesToBigInt(value: Uint8Array) {
+  return BigInt(`0x${toHex(value)}`);
+}
+
+function bigIntToBytes(value: bigint) {
+  const hex = value.toString(16).padStart(64, "0");
+  return Uint8Array.from(hex.match(/.{2}/gu) ?? [], (pair) => Number.parseInt(pair, 16));
+}
