@@ -2,9 +2,20 @@
 
 ## Unreleased
 
+### Added
+
+- канонический parser расширенных BIP32-ключей с Base58Check-проверкой;
+- определение public/private key, сети, SLIP-132 prefix, depth, parent fingerprint, child number, chain code и key data;
+- каноническая модель derivation path;
+- нормализация hardened-маркеров `'`, `h` и `H`;
+- структурная проверка prefix derivation path;
+- отдельные тесты extended-key и derivation-path ядра.
+
 ### Changed
 
 - HD Wallet Explorer официально принял область Wallet Explorer, Seed Explorer и Derivation Explorer из ошибочного roadmap Wallet Key Explorer.
+- Watch-only больше не содержит отдельную реализацию Base58Check и использует общий extended-key parser.
+- Bitcoin path builder и Bitcoin derivation используют общий derivation-path formatter и validator.
 - В roadmap добавлены работа с BIP39 mnemonic и passphrase, wallet seed, master fingerprint, master keys и sensitive-session lifecycle.
 - Добавлен отдельный этап сравнения BIP44/BIP49/BIP84/BIP86 derivation paths.
 - Уточнены границы: descriptors, multisig, PSBT и анализ готовых публичных объектов остаются в Wallet Key Explorer.
@@ -12,9 +23,9 @@
 
 ### Planned
 
-- аудит и унификация существующего derivation core;
+- ephemeral sensitive-session model;
 - Seed Explorer;
-- Derivation Explorer;
+- Derivation Explorer UI;
 - Path Comparison;
 - интеграция модулей в Professional Explorer UI.
 
