@@ -85,7 +85,14 @@ export function createWorkspaceAddress(input: Readonly<{ chain: "bitcoin" | "eth
 }
 
 export function buildWorkspace(name: string, profiles: WatchProfile[], discoveries: DiscoverySnapshot[], addresses: WorkspaceAddress[]): WalletWorkspace {
-  return { version: 1, name: name.trim() || "HD Wallet Workspace", profiles, discoveries, addresses, exportedAt: new Date().toISOString() };
+  return {
+    version: 1,
+    name: name.trim() || "HD Wallet Workspace",
+    profiles: profiles.filter(isWatchProfile).map(sanitizeProfile),
+    discoveries: discoveries.filter(isDiscoverySnapshot).map(sanitizeDiscovery),
+    addresses: addresses.filter(isWorkspaceAddress).map(sanitizeAddress),
+    exportedAt: new Date().toISOString(),
+  };
 }
 
 export function parseWorkspace(value: string): WalletWorkspace {
@@ -96,5 +103,55 @@ export function parseWorkspace(value: string): WalletWorkspace {
   if (data.version !== 1 || typeof data.name !== "string" || !Array.isArray(data.profiles) || !Array.isArray(data.discoveries) || !Array.isArray(data.addresses)) {
     throw new Error("Неподдерживаемая структура workspace.");
   }
-  return data as WalletWorkspace;
+  return buildWorkspace(data.name, data.profiles, data.discoveries, data.addresses);
+}
+
+function isWatchProfile(value: unknown): value is WatchProfile {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<WatchProfile>;
+  return typeof item.id === "string" && typeof item.name === "string" &&
+    typeof item.extendedPublicKey === "string" && typeof item.createdAt === "string";
+}
+
+function sanitizeProfile(profile: WatchProfile): WatchProfile {
+  return {
+    id: profile.id,
+    name: profile.name,
+    extendedPublicKey: profile.extendedPublicKey,
+    createdAt: profile.createdAt,
+  };
+}
+
+function sanitizeDiscovery(snapshot: DiscoverySnapshot): DiscoverySnapshot {
+  return {
+    id: snapshot.id,
+    profileName: snapshot.profileName,
+    extendedPublicKey: snapshot.extendedPublicKey,
+    network: snapshot.network,
+    checked: snapshot.checked,
+    used: snapshot.used,
+    errors: snapshot.errors,
+    balanceSats: snapshot.balanceSats,
+    addresses: snapshot.addresses.map((item) => ({
+      address: item.address,
+      branch: item.branch,
+      index: item.index,
+      balance: item.balance,
+      transactionCount: item.transactionCount,
+      status: item.status,
+    })),
+    createdAt: snapshot.createdAt,
+  };
+}
+
+function sanitizeAddress(item: WorkspaceAddress): WorkspaceAddress {
+  return {
+    id: item.id,
+    chain: item.chain,
+    address: item.address,
+    label: item.label,
+    note: item.note,
+    favorite: item.favorite,
+    createdAt: item.createdAt,
+  };
 }
