@@ -9,20 +9,70 @@ import { WorkspacePanel } from "./workspace-panel";
 
 type Section = "workspace" | "seed" | "derivation" | "comparison" | "explorer";
 
-export function AppShell(){
-  const[section,setSection]=useState<Section>("workspace");
-  return <>
-    <div className="app-nav" aria-label="Основная навигация">
-      <button className={section==="workspace"?"active":""} onClick={()=>setSection("workspace")}><span>◫</span><div><strong>Workspace</strong><small>Portfolio, history, notes</small></div></button>
-      <button className={section==="seed"?"active":""} onClick={()=>setSection("seed")}><span>✦</span><div><strong>Seed Explorer</strong><small>BIP39, entropy, master keys</small></div></button>
-      <button className={section==="derivation"?"active":""} onClick={()=>setSection("derivation")}><span>⌘</span><div><strong>Derivation Explorer</strong><small>Paths, presets, public results</small></div></button>
-      <button className={section==="comparison"?"active":""} onClick={()=>setSection("comparison")}><span>≋</span><div><strong>Path Comparison</strong><small>BIP44, 49, 84, 86, Ethereum</small></div></button>
-      <button className={section==="explorer"?"active":""} onClick={()=>setSection("explorer")}><span>◇</span><div><strong>Explorer</strong><small>Address generation, scanner, watch-only</small></div></button>
+const NAVIGATION: ReadonlyArray<Readonly<{
+  id: Section;
+  icon: string;
+  title: string;
+  description: string;
+  group: "Public workspace" | "Sensitive tools" | "Wallet tools";
+}>> = [
+  { id: "workspace", icon: "◫", title: "Workspace", description: "Portfolio, history and notes", group: "Public workspace" },
+  { id: "seed", icon: "✦", title: "Seed Explorer", description: "BIP39, entropy and master keys", group: "Sensitive tools" },
+  { id: "derivation", icon: "⌘", title: "Derivation Explorer", description: "Custom paths and public results", group: "Sensitive tools" },
+  { id: "comparison", icon: "≋", title: "Path Comparison", description: "BIP44, 49, 84, 86 and Ethereum", group: "Sensitive tools" },
+  { id: "explorer", icon: "◇", title: "Wallet Explorer", description: "Addresses, scanner and watch-only", group: "Wallet tools" },
+];
+
+export function AppShell() {
+  const [section, setSection] = useState<Section>("workspace");
+  const active = NAVIGATION.find((item) => item.id === section) ?? NAVIGATION[0];
+
+  return (
+    <div className="app-layout">
+      <aside className="app-sidebar" aria-label="Основная навигация">
+        <div className="sidebar-intro">
+          <span className="safe-badge">v0.11.0</span>
+          <strong>Wallet Exploration Suite</strong>
+          <p>Локальные инструменты для известных seed, paths и публичных wallet-данных.</p>
+        </div>
+
+        {["Public workspace", "Sensitive tools", "Wallet tools"].map((group) => (
+          <div className="nav-group" key={group}>
+            <span className="nav-group-label">{group}</span>
+            {NAVIGATION.filter((item) => item.group === group).map((item) => (
+              <button
+                key={item.id}
+                className={section === item.id ? "nav-item active" : "nav-item"}
+                onClick={() => setSection(item.id)}
+                aria-current={section === item.id ? "page" : undefined}
+              >
+                <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                <span><strong>{item.title}</strong><small>{item.description}</small></span>
+              </button>
+            ))}
+          </div>
+        ))}
+
+        <div className="sidebar-security">
+          <strong>Security boundary</strong>
+          <p>Workspace хранит только публичные данные. Seed-инструменты работают в памяти вкладки.</p>
+        </div>
+      </aside>
+
+      <div className="app-content">
+        <div className="content-heading">
+          <div><span className="eyebrow">HD WALLET EXPLORER</span><h1>{active.title}</h1><p>{active.description}</p></div>
+          <span className={section === "workspace" || section === "explorer" ? "context-badge public" : "context-badge sensitive"}>
+            {section === "workspace" || section === "explorer" ? "PUBLIC DATA" : "SENSITIVE SESSION"}
+          </span>
+        </div>
+
+        {section === "workspace" ? <section className="panel workspace-panel"><WorkspacePanel /></section> : null}
+        {section === "seed" ? <SeedExplorerPanel /> : null}
+        {section === "derivation" ? <DerivationExplorerPanel /> : null}
+        {section === "comparison" ? <PathComparisonPanel /> : null}
+        {section === "explorer" ? <WalletExplorer /> : null}
+      </div>
     </div>
-    {section==="workspace"?<section className="panel workspace-panel"><WorkspacePanel/></section>:null}
-    {section==="seed"?<SeedExplorerPanel/>:null}
-    {section==="derivation"?<DerivationExplorerPanel/>:null}
-    {section==="comparison"?<PathComparisonPanel/>:null}
-    {section==="explorer"?<WalletExplorer/>:null}
-  </>;
+  );
 }
