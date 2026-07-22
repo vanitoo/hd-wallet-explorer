@@ -24,6 +24,10 @@ Recovery, перебор неизвестных путей и идентифик
 
 ## Текущие возможности
 
+- Рабочий Seed Explorer с BIP39 validation для 12/15/18/21/24 слов.
+- Optional BIP39 passphrase, entropy, wallet seed и master fingerprint.
+- Master xpub и masked master xprv в отдельно включаемом опасном режиме.
+- Автоматическая очистка чувствительной сессии через пять минут.
 - Ethereum offline-деривация по `m/44'/60'/0'/0/N`.
 - Bitcoin mainnet/testnet: BIP44, BIP49, BIP84 и BIP86.
 - Генерация одного адреса или диапазона.
@@ -67,6 +71,20 @@ Workspace хранит только публичные данные в `localSto
 
 Seed, mnemonic passphrase, wallet seed и приватные ключи не должны попадать в Workspace или `wallet-project.json`.
 
+### Seed Explorer
+
+1. Откройте **Seed Explorer** в верхней навигации.
+2. Введите BIP39 mnemonic из 12, 15, 18, 21 или 24 английских слов.
+3. При необходимости укажите BIP39 passphrase.
+4. Нажмите **Проверить seed**.
+5. Проверьте entropy, checksum, master fingerprint и master xpub.
+6. Wallet seed и master xprv по умолчанию замаскированы и раскрываются отдельными кнопками.
+7. После работы нажмите **Очистить чувствительные данные**.
+
+Mnemonic, passphrase и вычисленные секреты находятся только в состоянии текущей вкладки. Они не записываются в Workspace или localStorage. Сессия автоматически очищается через пять минут бездействия.
+
+Для безопасной проверки интерфейса используйте встроенную демо-фразу. Рабочую seed-фразу следует исследовать только в изолированной офлайн-среде.
+
 ### Один адрес
 
 1. Откройте Explorer.
@@ -100,6 +118,8 @@ Discovery автоматически проверяет ветки `/0` и `/1` 
 
 ### Seed Explorer
 
+Реализовано базовое ядро и интерфейс:
+
 - проверка BIP39 mnemonic;
 - 12/15/18/21/24 слов;
 - optional passphrase;
@@ -111,6 +131,8 @@ Discovery автоматически проверяет ветки `/0` и `/1` 
 - маскирование секретов;
 - ручная и автоматическая очистка sensitive session;
 - полный запрет сохранения секретов в Workspace.
+
+Осталось добавить copy controls с явными предупреждениями, security tests сериализации Workspace и полный набор BIP32 vectors.
 
 ### Derivation Explorer
 
@@ -190,6 +212,7 @@ HD Wallet Explorer будет импортировать готовые публ
 - Сетевой режим выключен до явного согласия.
 - Во внешние API отправляются только публичные адреса.
 - Mnemonic, passphrase, seed, private keys и WIF не отправляются в сеть.
+- Seed Explorer не подключён к Workspace/localStorage и автоматически очищает чувствительную сессию.
 - HTTPS обязателен вне localhost.
 - URL с credentials отклоняются.
 - Sensitive session не должна сохраняться в `localStorage`, URL, логах или workspace export.
