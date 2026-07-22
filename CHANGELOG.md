@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.10.0 — 2026-07-22
+
+- Fixed React 19 ESLint failures caused by synchronous setState calls inside effects.
+- Added a top-level Workspace and Explorer navigation shell.
+- Added portfolio-style dashboard cards for public wallet data.
+- Added persistent discovery snapshots with balances and usage summaries.
+- Added a public address book with labels, notes, favorites, search and deletion.
+- Added full public workspace export/import through `wallet-project.json`.
+- Added responsive workspace styling and workspace domain tests.
+- Updated footer version to v0.10.0.
+
 ## 0.8.0 — 2026-07-22
 
 - Added Watch-only Discovery Engine v1.
