@@ -18,13 +18,21 @@
 - [x] Public address notes, favorites and search
 - [x] Public workspace JSON import/export
 - [x] Adopt Wallet Explorer scope from Wallet Key Explorer roadmap
+- [x] Audit existing BIP39, BIP32, Bitcoin and Ethereum derivation modules
+- [x] Add canonical extended-key parser for public and private BIP32 versions
+- [x] Unify watch-only validation with the canonical extended-key parser
+- [x] Define canonical derivation-path parser and formatter
+- [x] Normalize derivation markers `'`, `h` and `H`
+- [x] Add extended-key and derivation-path tests
 
 ## v1.0 — Wallet Exploration Suite
 
 ### Foundation
 
-- [ ] Audit existing BIP39, BIP32, Bitcoin and Ethereum derivation modules
-- [ ] Define canonical derivation-path model
+- [x] Audit existing BIP39, BIP32, Bitcoin and Ethereum derivation modules
+- [x] Define canonical derivation-path model
+- [x] Centralize Base58Check extended-key parsing and metadata validation
+- [x] Reuse canonical path validation in Bitcoin derivation
 - [ ] Define ephemeral sensitive-session model
 - [ ] Guarantee secrets never enter localStorage, URL, logs or workspace export
 - [ ] Add security tests for workspace serialization
@@ -48,8 +56,8 @@
 ### Derivation Explorer
 
 - [ ] Arbitrary derivation path input
-- [ ] Normalize `'`, `h` and `H`
-- [ ] Validate hardened and non-hardened segments
+- [x] Normalize `'`, `h` and `H`
+- [x] Validate hardened and non-hardened segments
 - [ ] Explain purpose, coin type, account, change and index
 - [ ] BIP44 preset
 - [ ] BIP49 preset
@@ -58,7 +66,7 @@
 - [ ] Receive/change branches
 - [ ] Derive public key and address
 - [ ] Export only public results
-- [ ] Add derivation-path parser tests
+- [x] Add derivation-path parser tests
 
 ### Path Comparison
 
