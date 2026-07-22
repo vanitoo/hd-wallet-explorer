@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 — 2026-07-22
+
+- Finished the runnable scanner workflow in the browser UI.
+- Added Bitcoin mainnet/testnet Esplora endpoint presets.
+- Added request timeout, retry backoff and configurable request delay.
+- Added explicit scan states, progress messages and result summary.
+- Added stricter endpoint validation, including rejection of credentials in URLs.
+- Expanded scanner tests and usage documentation.
+
 ## 0.5.0 — 2026-07-22
 
 - Added opt-in public-address balance scanning.
