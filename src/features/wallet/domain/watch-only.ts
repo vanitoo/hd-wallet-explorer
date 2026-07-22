@@ -31,6 +31,15 @@ const VERSION_INFO: Record<number, Omit<WatchKeyInfo, "depth" | "fingerprint">> 
   0x045f1cf6: { prefix: "vpub", network: "testnet", type: "native-segwit" },
 };
 
+const PRIVATE_VERSIONS = new Set([
+  0x0488ade4, // xprv
+  0x049d7878, // yprv
+  0x04b2430c, // zprv
+  0x04358394, // tprv
+  0x044a4e28, // uprv
+  0x045f18bc, // vprv
+]);
+
 const STANDARD_VERSION: Record<BitcoinNetwork, number> = {
   mainnet: 0x0488b21e,
   testnet: 0x043587cf,
@@ -39,6 +48,9 @@ const STANDARD_VERSION: Record<BitcoinNetwork, number> = {
 export function inspectWatchKey(value: string): WatchKeyInfo {
   const decoded = decodeExtendedKey(value);
   const version = readUint32(decoded, 0);
+  if (PRIVATE_VERSIONS.has(version) || decoded[45] === 0) {
+    throw new Error("Watch-only принимает только расширенный публичный ключ; приватный ключ использовать нельзя.");
+  }
   const info = VERSION_INFO[version];
   if (!info) throw new Error("Поддерживаются xpub, ypub, zpub, tpub, upub и vpub.");
   if (decoded[45] !== 2 && decoded[45] !== 3) throw new Error("Расширенный ключ не является публичным.");
