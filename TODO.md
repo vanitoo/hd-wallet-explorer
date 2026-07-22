@@ -2,108 +2,59 @@
 
 ## Completed
 
-- [x] Derivation path engine
-- [x] Ethereum offline derivation
-- [x] Bitcoin BIP44/BIP49/BIP84/BIP86
-- [x] Local address range generation
-- [x] CSV/JSON export
-- [x] Public-address balance scanner
-- [x] Gap-limit stopping
-- [x] Request cancellation, retries and configurable delays
+- [x] Canonical BIP32 extended-key parser
+- [x] Canonical derivation-path parser and formatter
+- [x] BIP39 mnemonic validation for 12/15/18/21/24 words
+- [x] Seed Explorer with entropy, seed, fingerprint, xpub and guarded xprv
+- [x] Ephemeral sensitive-session model
+- [x] Manual and automatic sensitive-data cleanup
+- [x] Derivation Explorer with arbitrary paths
+- [x] BIP44/BIP49/BIP84/BIP86 and Ethereum presets
+- [x] Bitcoin mainnet/testnet path classification
+- [x] Path-level explanations
+- [x] Path Comparison for Bitcoin standards and Ethereum
+- [x] CSV/JSON public comparison export
+- [x] Bitcoin and Ethereum address generation
+- [x] Public address ranges
+- [x] Public-address scanner
 - [x] Watch-only xpub/ypub/zpub/tpub/upub/vpub profiles
-- [x] Public profile persistence in localStorage
-- [x] Watch-only scanner integration
-- [x] External/change discovery for current account
-- [x] Workspace dashboard and discovery history
-- [x] Public address notes, favorites and search
-- [x] Public workspace JSON import/export
-- [x] Adopt Wallet Explorer scope from Wallet Key Explorer roadmap
-- [x] Audit existing BIP39, BIP32, Bitcoin and Ethereum derivation modules
-- [x] Add canonical extended-key parser for public and private BIP32 versions
-- [x] Unify watch-only validation with the canonical extended-key parser
-- [x] Define canonical derivation-path parser and formatter
-- [x] Normalize derivation markers `'`, `h` and `H`
-- [x] Add extended-key and derivation-path tests
-- [x] Add Seed Explorer with ephemeral in-memory state
-- [x] Add official BIP39 seed-vector coverage
-- [x] Add Derivation Explorer with arbitrary paths and presets
-- [x] Add derivation-level explanations and public result output
-- [x] Add Path Comparison for BIP44/BIP49/BIP84/BIP86 and Ethereum
-- [x] Add public-only CSV/JSON comparison export
-- [x] Add path-comparison tests for mainnet, testnet and secret-free exports
+- [x] External/change discovery
+- [x] Public Workspace, notes and discovery history
+- [x] Workspace JSON import/export
+- [x] Runtime allowlist sanitization for Workspace serialization
+- [x] Security tests preventing secret-like extra fields in Workspace
+- [x] Unified responsive navigation shell
+- [x] Project boundary migration from Wallet Key Explorer
+- [x] README, changelog and Path Comparison documentation
 
-## v1.0 — Wallet Exploration Suite
-
-### Foundation
-
-- [x] Audit existing BIP39, BIP32, Bitcoin and Ethereum derivation modules
-- [x] Define canonical derivation-path model
-- [x] Centralize Base58Check extended-key parsing and metadata validation
-- [x] Reuse canonical path validation in Bitcoin derivation
-- [x] Keep Seed Explorer secrets in ephemeral React state only
-- [x] Keep mnemonic, passphrase, seed and xprv out of Workspace and localStorage flows
-- [ ] Add explicit workspace-serialization security tests
+## v0.12 — Hardening
 
 ### Seed Explorer
 
-- [x] BIP39 mnemonic validation
-- [x] Support 12/15/18/21/24 words
-- [x] Optional BIP39 passphrase
-- [x] Display entropy
-- [x] Display mnemonic checksum status
-- [x] Display wallet seed with masking
-- [x] Display master fingerprint
-- [x] Display master xpub
-- [x] Dangerous opt-in display for xprv
 - [ ] Copy controls with explicit warnings
-- [x] Manual clear-sensitive-data action
-- [x] Automatic sensitive-session timeout
-- [x] Official BIP39 seed-vector tests
-- [ ] Add complete official BIP32 vector suite
+- [ ] Optional clipboard auto-clear
+- [ ] Complete official BIP32 vector suite
+- [ ] Visibility timer for revealed seed and xprv
+- [ ] Clear sensitive session on tab visibility loss option
 
 ### Derivation Explorer
 
-- [x] Arbitrary derivation path input
-- [x] Normalize `'`, `h` and `H`
-- [x] Validate hardened and non-hardened segments
-- [x] Explain purpose, coin type, account, change and index
-- [x] BIP44 preset
-- [x] BIP49 preset
-- [x] BIP84 preset
-- [x] BIP86 preset
-- [x] Receive/change branches through custom path and preset options
-- [x] Derive public key and address
-- [x] Keep UI output public-only
-- [x] Add derivation explorer tests
-- [ ] Add CSV/JSON export for single public derivation results
+- [ ] CSV/JSON export for a single public derivation result
+- [ ] More explicit validation for chain-specific path depth
+- [ ] Preset controls for account, branch and index directly in the panel
+- [ ] Public-only copy controls
 
-### Path Comparison
+### Security
 
-- [x] Compare BIP44/BIP49/BIP84/BIP86 from one seed
-- [x] Show path, standard, script type, address and public key
-- [x] Bitcoin mainnet/testnet comparison
-- [x] Ethereum standard-path comparison
-- [x] Explain why one seed creates different addresses
-- [x] CSV/JSON export
-- [x] Comparison tests
-
-### Professional Explorer UI
-
-- [ ] Permanent sidebar navigation
-- [ ] Dashboard as default landing page
-- [ ] Sections: Workspace, Seed, Derivation, Comparison, Bitcoin, Ethereum, Settings, About
-- [ ] Reusable stat cards and summary panels
-- [ ] Recent discovery and workspace activity
-- [ ] Public portfolio summary
-- [ ] Better sorting, filtering and search
-- [ ] Quick actions
-- [ ] Responsive desktop-first layout
-- [ ] Optimize large address ranges
-- [ ] Complete v1.0 documentation
+- [ ] Threat model documentation
+- [ ] Dependency and supply-chain review
+- [ ] Content Security Policy review
+- [ ] Independent security audit
+- [ ] Accessibility audit
 
 ## v1.1 — Descriptor Integration
 
-Descriptor creation and deep diagnostics stay in Wallet Key Explorer. HD Wallet Explorer imports descriptors for watch-only exploration.
+Descriptor creation and deep diagnostics remain in Wallet Key Explorer. HD Wallet Explorer imports ready public descriptors.
 
 - [ ] Descriptor import
 - [ ] Descriptor checksum validation
@@ -127,7 +78,7 @@ Descriptor creation and deep diagnostics stay in Wallet Key Explorer. HD Wallet 
 
 ## v1.3 — Blockchain Explorer
 
-- [ ] Full normalized transaction history
+- [ ] Normalized transaction history
 - [ ] Transaction fees and explorer links
 - [ ] UTXO viewer
 - [ ] Input/output inspection
@@ -153,19 +104,11 @@ Descriptor creation and deep diagnostics stay in Wallet Key Explorer. HD Wallet 
 - [ ] Report generator extensions
 - [ ] Additional network plugins
 
-## Security and maintenance
-
-- [ ] Encrypted optional public-profile backup
-- [ ] Independent security audit
-- [ ] Threat model documentation
-- [ ] Dependency and supply-chain review
-- [ ] Accessibility audit
-
 ## Project boundaries
 
 ### Wallet Key Explorer
 
-Owns analysis of existing public cryptographic objects: extended public keys, descriptors, multisig, addresses and PSBT.
+Owns analysis and construction of existing public cryptographic objects: extended public keys, descriptors, multisig, addresses and PSBT.
 
 ### Wallet Recovery Studio
 
