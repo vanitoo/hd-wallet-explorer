@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 — 2026-07-22
+
+- Added opt-in public-address balance scanning.
+- Added Ethereum JSON-RPC and Bitcoin Esplora-compatible adapters.
+- Added gap-limit stopping, progress reporting and cancellation.
+- Added endpoint validation with HTTPS required outside localhost.
+- Added scanner status, balances, transaction counts and error display.
+- Added scanner validation and formatting tests.
+
 ## 0.4.0 — 2026-07-22
 
 - Added local generation of consecutive Ethereum and Bitcoin address ranges.
