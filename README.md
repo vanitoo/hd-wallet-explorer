@@ -2,14 +2,16 @@
 
 Полностью локальный open-source обозреватель HD-кошельков.
 
-## v0.3.0
+## v0.4.0
 
 - Ethereum: произвольный address index по пути `m/44'/60'/0'/0/N`.
-- Bitcoin mainnet/testnet.
-- Bitcoin Legacy BIP44, Nested SegWit BIP49, Native SegWit BIP84 и Taproot BIP86.
-- Account, external/change и address index.
-- WIF и приватный ключ скрыты по умолчанию.
+- Bitcoin mainnet/testnet: Legacy BIP44, Nested SegWit BIP49, Native SegWit BIP84 и Taproot BIP86.
+- Одиночная деривация с защищённым отображением приватного ключа и WIF.
+- Локальная генерация диапазона до 100 публичных адресов.
+- Таблица путей и адресов, копирование, экспорт CSV и JSON.
 - Без сервера, регистрации, cookies и аналитики.
+
+Диапазон адресов формируется только локально. В результатах диапазона приватные ключи и WIF не сохраняются и не отображаются.
 
 ## Запуск
 
