@@ -26,6 +26,8 @@
 - [x] Add extended-key and derivation-path tests
 - [x] Add Seed Explorer with ephemeral in-memory state
 - [x] Add official BIP39 seed-vector coverage
+- [x] Add Derivation Explorer with arbitrary paths and presets
+- [x] Add derivation-level explanations and public result output
 
 ## v1.0 — Wallet Exploration Suite
 
@@ -58,18 +60,19 @@
 
 ### Derivation Explorer
 
-- [ ] Arbitrary derivation path input
+- [x] Arbitrary derivation path input
 - [x] Normalize `'`, `h` and `H`
 - [x] Validate hardened and non-hardened segments
-- [ ] Explain purpose, coin type, account, change and index
-- [ ] BIP44 preset
-- [ ] BIP49 preset
-- [ ] BIP84 preset
-- [ ] BIP86 preset
-- [ ] Receive/change branches
-- [ ] Derive public key and address
-- [ ] Export only public results
-- [x] Add derivation-path parser tests
+- [x] Explain purpose, coin type, account, change and index
+- [x] BIP44 preset
+- [x] BIP49 preset
+- [x] BIP84 preset
+- [x] BIP86 preset
+- [x] Receive/change branches through custom path and preset options
+- [x] Derive public key and address
+- [x] Keep UI output public-only
+- [x] Add derivation explorer tests
+- [ ] Add CSV/JSON export for public derivation results
 
 ### Path Comparison
 
